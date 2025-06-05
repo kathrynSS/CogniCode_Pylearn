@@ -3108,12 +3108,6 @@
             try {
                 showTypingIndicator();
                 
-                // Add timeout handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, 150000); // 2.5 minutes timeout
-                
                 const sessionSummary = `Working on ${currentProject || 'Python concepts'}, currently on step ${currentStep}`;
                 const concepts = Array.from(document.querySelectorAll('.concept-tag')).map(tag => tag.textContent);
                 
@@ -3127,11 +3121,9 @@
                         session_summary: sessionSummary,
                         concepts_covered: concepts,
                         response_type: 'direct'
-                    }),
-                    signal: controller.signal
+                    })
                 });
 
-                clearTimeout(timeoutId);
                 const data = await response.json();
                 hideTypingIndicator();
 
@@ -3143,12 +3135,7 @@
             } catch (error) {
                 hideTypingIndicator();
                 console.error('Error sending reflective message:', error);
-                
-                if (error.name === 'AbortError') {
-                    addBotMessage("Your reflection request is taking longer than expected. Please try again with a shorter question.");
-                } else {
-                    addBotMessage("There was an error processing your message. Please try again.");
-                }
+                addBotMessage("There was an error processing your message. Please try again.");
             }
         }
 
@@ -3156,12 +3143,6 @@
         async function sendHintMessage(message) {
             try {
                 showTypingIndicator();
-                
-                // Add timeout handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, 150000); // 2.5 minutes timeout
                 
                 const response = await fetch('/api/hint_chat', {
                     method: 'POST',
@@ -3173,11 +3154,9 @@
                         error_context: `Working on ${currentProject || 'Python'} step ${currentStep}`,
                         student_progress: `Completed ${completedSteps.length} steps so far`,
                         response_type: 'direct'
-                    }),
-                    signal: controller.signal
+                    })
                 });
 
-                clearTimeout(timeoutId);
                 const data = await response.json();
                 hideTypingIndicator();
 
@@ -3189,12 +3168,7 @@
             } catch (error) {
                 hideTypingIndicator();
                 console.error('Error sending hint message:', error);
-                
-                if (error.name === 'AbortError') {
-                    addBotMessage("Your hint request is taking longer than expected. Please try asking for a more specific hint.");
-                } else {
-                    addBotMessage("There was an error processing your message. Please try again.");
-                }
+                addBotMessage("There was an error processing your message. Please try again.");
             }
         }
 
@@ -3207,7 +3181,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => {
                     controller.abort();
-                }, 150000); // 150 seconds (2.5 minutes) timeout on frontend
+                }, 90000); // 90 seconds timeout on frontend
                 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -3253,12 +3227,6 @@
             try {
                 showTypingIndicator();
                 
-                // Add timeout handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, 150000); // 2.5 minutes timeout
-                
                 const response = await fetch('/api/submit_code', {
                     method: 'POST',
                     headers: {
@@ -3268,11 +3236,9 @@
                         project_id: currentProject,
                         step_num: currentStep,
                         code: code
-                    }),
-                    signal: controller.signal
+                    })
                 });
 
-                clearTimeout(timeoutId);
                 const data = await response.json();
                 hideTypingIndicator();
 
@@ -3343,12 +3309,7 @@
             } catch (error) {
                 hideTypingIndicator();
                 console.error('Error submitting code:', error);
-                
-                if (error.name === 'AbortError') {
-                    addBotMessage("Your code review is taking longer than expected. Please try submitting smaller code snippets or try again.");
-                } else {
-                    addBotMessage("There was an error reviewing your code. Please try again.");
-                }
+                addBotMessage("There was an error reviewing your code. Please try again.");
             }
         }
 
