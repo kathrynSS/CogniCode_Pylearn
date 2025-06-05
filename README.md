@@ -4,7 +4,6 @@
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel)](https://capstone-six-alpha.vercel.app/)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.3.2-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 > **A next-generation AI-powered platform for learning Python interactively — featuring a visual knowledge graph, an intelligent chatbot tutor, and a built-in online IDE. Level up your programming skills with a personalized and immersive experience.**
 
@@ -15,7 +14,7 @@
 > *Note: These videos are simple demos of the initial version. More features and improvements are coming soon!*
 
 **Interactive Knowledge Graph**  
-https://img.shields.io/badge/Watch%20Video-Interactive%20Graph-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing
+https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing
 
 *Explore how the visual knowledge graph works in CogniCode.*
 
