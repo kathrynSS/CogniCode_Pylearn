@@ -224,7 +224,7 @@ class DatabaseManager:
             )
             
             if existing_user:
-                return None, "用户名或邮箱已存在"
+                return None, "Username or email already exists"
             
             # 创建密码哈希
             password_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -238,13 +238,13 @@ class DatabaseManager:
             user_id = result['id'] if result else None
             
             if user_id:
-                return user_id, "用户创建成功"
+                return user_id, "User created successfully"
             else:
-                return None, "用户创建失败"
+                return None, "Failed to create user"
             
         except Exception as e:
             logger.error(f"创建用户失败: {e}")
-            return None, f"创建用户失败: {str(e)}"
+            return None, f"Failed to create user: {str(e)}"
     
     def authenticate_user(self, username_or_email, password):
         """验证用户登录"""
@@ -264,13 +264,13 @@ class DatabaseManager:
             )
             
             if user:
-                return user, "登录成功"
+                return user, "Login successful"
             else:
-                return None, "用户名/邮箱或密码错误"
+                return None, "Invalid username/email or password"
             
         except Exception as e:
             logger.error(f"用户认证失败: {e}")
-            return None, f"认证失败: {str(e)}"
+            return None, f"Authentication failed: {str(e)}"
     
     def create_session(self, user_id, expires_hours=24):
         """创建用户会话"""
