@@ -53,7 +53,7 @@ class DatabaseManager:
                 self.connection_string,
                 # Serverless优化配置
                 connect_timeout=10,
-                application_name="PyLearn-App"
+                application_name="CogniCode-App"
             )
             test_conn.close()
             logger.info("✅ 数据库连接成功!")
@@ -75,7 +75,7 @@ class DatabaseManager:
         return psycopg2.connect(
             self.connection_string,
             connect_timeout=10,
-            application_name="PyLearn-App"
+            application_name="CogniCode-App"
         )
     
     def init_database(self):
