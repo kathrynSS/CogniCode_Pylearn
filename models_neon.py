@@ -17,8 +17,11 @@ class DatabaseManager:
         self.db_type = 'postgresql'
         self.connection_string = None
         
-        # 尝试从环境变量获取数据库连接
-        postgres_url = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL')
+        # 默认数据库连接字符串（Neon数据库）
+        default_postgres_url = "postgres://neondb_owner:npg_Qm6aUw8CuZBf@ep-raspy-smoke-a4ozkoaf-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+        
+        # 尝试从环境变量获取数据库连接，如果没有则使用默认值
+        postgres_url = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL') or default_postgres_url
         
         if not postgres_url:
             logger.error("❌ 没有找到数据库连接字符串!")
@@ -32,7 +35,12 @@ class DatabaseManager:
             raise RuntimeError("缺少数据库连接字符串，请设置 POSTGRES_URL 或 DATABASE_URL 环境变量")
         
         self.connection_string = postgres_url
-        logger.info("✅ 使用环境变量中的数据库连接")
+        
+        # 检查是否使用了默认连接字符串
+        if postgres_url == default_postgres_url:
+            logger.info("✅ 使用内置的Neon数据库连接")
+        else:
+            logger.info("✅ 使用环境变量中的数据库连接")
         
         # 检测数据库提供商
         if 'neon.tech' in postgres_url:
@@ -197,9 +205,15 @@ class DatabaseManager:
             
             if fetch_one:
                 result = cursor.fetchone()
+                # 如果是INSERT/UPDATE/DELETE语句，需要提交事务
+                if query.strip().upper().startswith(('INSERT', 'UPDATE', 'DELETE')):
+                    conn.commit()
                 return dict(result) if result else None
             elif fetch_all:
                 results = cursor.fetchall()
+                # 如果是INSERT/UPDATE/DELETE语句，需要提交事务
+                if query.strip().upper().startswith(('INSERT', 'UPDATE', 'DELETE')):
+                    conn.commit()
                 return [dict(row) for row in results]
             else:
                 conn.commit()
@@ -432,6 +446,7 @@ class DatabaseManager:
             logger.error(f"删除用户项目失败: {e}")
             return 0
 
+    # 继续添加其他方法...
     def save_user_note(self, user_id, title, content, topic=None, note_id=None):
         """保存或更新用户笔记"""
         try:

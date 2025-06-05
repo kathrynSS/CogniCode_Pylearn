@@ -15,12 +15,7 @@ import signal
 import time
 from werkzeug.utils import secure_filename
 import datetime
-import sqlite3
 import threading
-
-# 导入认证相关模块
-from models import DatabaseManager
-from auth_middleware import init_auth_middleware, require_auth, require_owner, optional_auth, get_current_user, get_current_user_id
 
 # 导入Google Drive服务
 from google_drive_service import GoogleDriveService
@@ -29,11 +24,39 @@ from google_drive_service import GoogleDriveService
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Enable CORS for all routes with credentials support
 
-# 初始化认证中间件
-init_auth_middleware(app)
-
-# 初始化数据库 - 使用环境变量或相对路径
-db_manager = DatabaseManager()
+# 导入认证相关模块
+try:
+    from models_neon import DatabaseManager
+    from auth_middleware import init_auth_middleware, require_auth, require_owner, optional_auth, get_current_user, get_current_user_id
+    
+    # 初始化认证中间件
+    init_auth_middleware(app)
+    
+    # 初始化数据库 - 使用环境变量或相对路径
+    db_manager = DatabaseManager()
+    DATABASE_AVAILABLE = True
+    print("✅ 数据库连接成功")
+    
+except Exception as e:
+    print(f"⚠️ 数据库连接失败: {e}")
+    print("🔄 应用将以受限模式运行（无用户认证功能）")
+    
+    # 创建假的中间件函数来避免错误
+    def fake_auth_middleware(f):
+        return f
+    
+    require_auth = fake_auth_middleware
+    require_owner = fake_auth_middleware  
+    optional_auth = fake_auth_middleware
+    
+    def get_current_user():
+        return None
+        
+    def get_current_user_id():
+        return None
+    
+    db_manager = None
+    DATABASE_AVAILABLE = False
 
 # 初始化Google Drive服务
 drive_service = None
@@ -97,6 +120,10 @@ print("🤖 DeepSeek API Configuration")
 print("=" * 60)
 
 try:
+    # Check OpenAI library version
+    import openai
+    print(f"📦 OpenAI library version: {openai.__version__}")
+    
     # HARDCODED API KEY for DeepSeek - WARNING: NOT RECOMMENDED FOR PRODUCTION!
     # Remove this and use environment variables for security
     HARDCODED_API_KEY = "sk-0e2c23a0864043f7bbfcb36546818447"  # DeepSeek API key
@@ -122,8 +149,9 @@ try:
             print("🔒 For production, use environment variables instead")
         else:
             print("✅ Found DEEPSEEK_API_KEY environment variable")
-            
-        # Initialize DeepSeek client with custom base_url
+        
+        # Simple, clean initialization (works with OpenAI 1.84.0+)
+        print("🔌 Initializing DeepSeek client...")
         client = OpenAI(
             api_key=api_key,
             base_url="https://api.deepseek.com"
@@ -147,7 +175,12 @@ except Exception as e:
     error_message = str(e)
     print(f"❌ DeepSeek API setup failed: {error_message}")
     
-    if "unsupported_country_region_territory" in error_message:
+    if "proxies" in error_message.lower():
+        print("🔧 Proxy configuration issue detected.")
+        print("💡 Solution: Upgrade OpenAI library:")
+        print("   pip install --upgrade openai")
+        print("   Then restart the application")
+    elif "unsupported_country_region_territory" in error_message:
         print("🌍 DeepSeek API is not available in your region.")
         print("💡 Solutions:")
         print("   - Use a VPN to access from a supported region")
@@ -1589,9 +1622,9 @@ def delete_file(file_id):
         storage_type = target_file.get('storage_type', 'local')
         
         # 从数据库删除文件记录
-        conn = sqlite3.connect(db_manager.db_path)
+        conn = db_manager.get_connection()
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM user_files WHERE id = ? AND user_id = ?', (file_id, user_id))
+        cursor.execute('DELETE FROM user_files WHERE id = %s AND user_id = %s', (file_id, user_id))
         conn.commit()
         conn.close()
         
@@ -1767,7 +1800,7 @@ def logout_all():
     """清除所有会话（不需要认证，用于解决缓存问题）- 改进版本"""
     try:
         # 清除所有会话（包括过期的和有效的）
-        conn = sqlite3.connect(db_manager.db_path)
+        conn = db_manager.get_connection()
         cursor = conn.cursor()
         cursor.execute('DELETE FROM user_sessions')
         conn.commit()
@@ -1982,13 +2015,13 @@ def update_user_privacy_settings():
         profile_data['privacy_settings'] = updated_privacy
         
         # 保存到数据库
-        conn = sqlite3.connect(db_manager.db_path)
+        conn = db_manager.get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
             UPDATE users 
-            SET profile_data = ?
-            WHERE id = ?
+            SET profile_data = %s
+            WHERE id = %s
         ''', (json.dumps(profile_data), user_id))
         
         conn.commit()
@@ -3157,7 +3190,7 @@ application = app
 # 本地开发运行
 if __name__ == '__main__':
     print("🚀 Starting Flask application...")
-    print("✅ Database initialized with SQLite")
+    print("✅ Database initialized with PostgreSQL")
     print("🌐 Server will be available at: http://127.0.0.1:5000")
     print("📝 Registration URL: http://127.0.0.1:5000/auth.html")
     print("=" * 50)
@@ -3197,9 +3230,9 @@ def rename_file(file_id):
             return jsonify({'success': False, 'error': 'File not found or access denied'}), 404
         
         # 更新数据库中的original_filename
-        conn = sqlite3.connect(db_manager.db_path)
+        conn = db_manager.get_connection()
         cursor = conn.cursor()
-        cursor.execute('UPDATE user_files SET original_filename = ? WHERE id = ? AND user_id = ?', 
+        cursor.execute('UPDATE user_files SET original_filename = %s WHERE id = %s AND user_id = %s', 
                       (new_name, file_id, user_id))
         
         if cursor.rowcount == 0:

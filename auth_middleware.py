@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify, g
-from models import DatabaseManager
+from models_neon import DatabaseManager
 
 # 初始化数据库管理器
 db_manager = DatabaseManager()
@@ -21,7 +21,7 @@ def init_auth_middleware(app):
             session_token = request.cookies.get('session_token')
         
         if session_token:
-            user = db_manager.validate_session(session_token)
+            user = db_manager.get_user_by_session(session_token)
             if user:
                 g.current_user = user
                 g.session_token = session_token
