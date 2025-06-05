@@ -1,121 +1,244 @@
-import sqlite3
+import os
 import hashlib
 import secrets
 from datetime import datetime, timedelta
 import json
 
+# 根据环境选择数据库驱动
+try:
+    # 优先使用 psycopg2 for PostgreSQL (Vercel)
+    import psycopg2
+    import psycopg2.extras
+    from psycopg2 import sql
+    DB_TYPE = 'postgresql'
+    print("✅ Using PostgreSQL (Vercel Postgres)")
+except ImportError:
+    try:
+        # 回退到 sqlite3 for local development
+        import sqlite3
+        DB_TYPE = 'sqlite'
+        print("⚠️  Using SQLite (local development)")
+    except ImportError:
+        raise ImportError("Neither psycopg2 nor sqlite3 is available")
+
 class DatabaseManager:
     def __init__(self, db_path='app_database.db'):
-        self.db_path = db_path
+        self.db_type = DB_TYPE
+        
+        if self.db_type == 'postgresql':
+            # Vercel Postgres connection
+            self.db_url = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL')
+            if not self.db_url:
+                print("❌ No POSTGRES_URL found, falling back to SQLite")
+                self.db_type = 'sqlite'
+                self.db_path = db_path
+            else:
+                print(f"🔗 Connecting to PostgreSQL: {self.db_url[:50]}...")
+        else:
+            self.db_path = db_path
+            
         self.init_database()
+    
+    def get_connection(self):
+        """获取数据库连接"""
+        if self.db_type == 'postgresql':
+            return psycopg2.connect(self.db_url)
+        else:
+            return sqlite3.connect(self.db_path)
     
     def init_database(self):
         """初始化数据库表"""
-        conn = sqlite3.connect(self.db_path)
+        conn = self.get_connection()
         cursor = conn.cursor()
         
-        # 用户表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                salt VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP,
-                is_active BOOLEAN DEFAULT 1,
-                profile_data TEXT  -- JSON格式存储额外信息
-            )
-        ''')
-        
-        # 用户会话表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                session_token VARCHAR(255) UNIQUE NOT NULL,
-                expires_at TIMESTAMP NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # 用户项目表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_projects (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                project_id VARCHAR(100) NOT NULL,
-                project_data TEXT NOT NULL,  -- JSON格式存储项目数据
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # 用户文件表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_files (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                filename VARCHAR(255) NOT NULL,
-                original_filename VARCHAR(255) NOT NULL,
-                file_path VARCHAR(500),  -- 保留用于兼容性，新文件将为NULL
-                drive_file_id VARCHAR(255),  -- Google Drive文件ID
-                drive_folder_id VARCHAR(255),  -- Google Drive文件夹ID
-                file_size INTEGER,
-                mime_type VARCHAR(100),
-                tags TEXT,  -- JSON格式存储标签
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                storage_type VARCHAR(20) DEFAULT 'drive',  -- 'local' 或 'drive'
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # 添加新列到现有表（如果不存在）
-        try:
-            cursor.execute('ALTER TABLE user_files ADD COLUMN drive_file_id VARCHAR(255)')
-        except sqlite3.OperationalError:
-            pass  # 列已存在
+        if self.db_type == 'postgresql':
+            # PostgreSQL 表创建语句
             
-        try:
-            cursor.execute('ALTER TABLE user_files ADD COLUMN drive_folder_id VARCHAR(255)')
-        except sqlite3.OperationalError:
-            pass  # 列已存在
+            # 用户表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    salt VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    profile_data TEXT
+                )
+            ''')
             
-        try:
-            cursor.execute('ALTER TABLE user_files ADD COLUMN storage_type VARCHAR(20) DEFAULT "drive"')
-        except sqlite3.OperationalError:
-            pass  # 列已存在
-        
-        # 用户笔记表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_notes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                content TEXT NOT NULL,
-                tags TEXT,  -- JSON格式存储标签
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # 用户聊天记录表
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_chat_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                conversation_id VARCHAR(100),
-                message_type VARCHAR(20) NOT NULL,  -- 'user' or 'assistant'
-                message_content TEXT NOT NULL,
-                context_data TEXT,  -- JSON格式存储上下文信息
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
+            # 用户会话表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_sessions (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    session_token VARCHAR(255) UNIQUE NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            # 用户项目表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_projects (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    project_id VARCHAR(100) NOT NULL,
+                    project_data TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            # 用户文件表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_files (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    filename VARCHAR(255) NOT NULL,
+                    original_filename VARCHAR(255) NOT NULL,
+                    file_path VARCHAR(500),
+                    drive_file_id VARCHAR(255),
+                    drive_folder_id VARCHAR(255),
+                    file_size INTEGER,
+                    mime_type VARCHAR(100),
+                    tags TEXT,
+                    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    storage_type VARCHAR(20) DEFAULT 'drive',
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            # 用户笔记表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_notes (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    tags TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            # 用户聊天记录表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_chat_history (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    conversation_id VARCHAR(100),
+                    message_type VARCHAR(20) NOT NULL,
+                    message_content TEXT NOT NULL,
+                    context_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+        else:
+            # SQLite 表创建语句（保持原有逻辑）
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    salt VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP,
+                    is_active BOOLEAN DEFAULT 1,
+                    profile_data TEXT
+                )
+            ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    session_token VARCHAR(255) UNIQUE NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_projects (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    project_id VARCHAR(100) NOT NULL,
+                    project_data TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_files (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    filename VARCHAR(255) NOT NULL,
+                    original_filename VARCHAR(255) NOT NULL,
+                    file_path VARCHAR(500),
+                    drive_file_id VARCHAR(255),
+                    drive_folder_id VARCHAR(255),
+                    file_size INTEGER,
+                    mime_type VARCHAR(100),
+                    tags TEXT,
+                    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    storage_type VARCHAR(20) DEFAULT 'drive',
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            # 添加新列到现有表（如果不存在）- SQLite特定
+            try:
+                cursor.execute('ALTER TABLE user_files ADD COLUMN drive_file_id VARCHAR(255)')
+            except sqlite3.OperationalError:
+                pass
+                
+            try:
+                cursor.execute('ALTER TABLE user_files ADD COLUMN drive_folder_id VARCHAR(255)')
+            except sqlite3.OperationalError:
+                pass
+                
+            try:
+                cursor.execute('ALTER TABLE user_files ADD COLUMN storage_type VARCHAR(20) DEFAULT "drive"')
+            except sqlite3.OperationalError:
+                pass
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_notes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    tags TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_chat_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    conversation_id VARCHAR(100),
+                    message_type VARCHAR(20) NOT NULL,
+                    message_content TEXT NOT NULL,
+                    context_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
         
         conn.commit()
         conn.close()
@@ -140,11 +263,12 @@ class DatabaseManager:
     def create_user(self, username, email, password, profile_data=None):
         """创建新用户"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             # 检查用户名和邮箱是否已存在
-            cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', 
+            cursor.execute('SELECT id FROM users WHERE username = %s OR email = %s' if self.db_type == 'postgresql' 
+                          else 'SELECT id FROM users WHERE username = ? OR email = ?', 
                           (username, email))
             if cursor.fetchone():
                 return None, "用户名或邮箱已存在"
@@ -153,13 +277,21 @@ class DatabaseManager:
             password_hash, salt = self.hash_password(password)
             
             # 插入新用户
-            cursor.execute('''
-                INSERT INTO users (username, email, password_hash, salt, profile_data)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (username, email, password_hash, salt, 
-                  json.dumps(profile_data) if profile_data else None))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO users (username, email, password_hash, salt, profile_data)
+                    VALUES (%s, %s, %s, %s, %s) RETURNING id
+                ''', (username, email, password_hash, salt, 
+                      json.dumps(profile_data) if profile_data else None))
+                user_id = cursor.fetchone()[0]
+            else:
+                cursor.execute('''
+                    INSERT INTO users (username, email, password_hash, salt, profile_data)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (username, email, password_hash, salt, 
+                      json.dumps(profile_data) if profile_data else None))
+                user_id = cursor.lastrowid
             
-            user_id = cursor.lastrowid
             conn.commit()
             conn.close()
             
@@ -171,15 +303,22 @@ class DatabaseManager:
     def authenticate_user(self, username_or_email, password):
         """用户登录验证"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             # 查找用户
-            cursor.execute('''
-                SELECT id, username, email, password_hash, salt, is_active 
-                FROM users 
-                WHERE (username = ? OR email = ?) AND is_active = 1
-            ''', (username_or_email, username_or_email))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT id, username, email, password_hash, salt, is_active 
+                    FROM users 
+                    WHERE (username = %s OR email = %s) AND is_active = TRUE
+                ''', (username_or_email, username_or_email))
+            else:
+                cursor.execute('''
+                    SELECT id, username, email, password_hash, salt, is_active 
+                    FROM users 
+                    WHERE (username = ? OR email = ?) AND is_active = 1
+                ''', (username_or_email, username_or_email))
             
             user = cursor.fetchone()
             if not user:
@@ -192,8 +331,11 @@ class DatabaseManager:
                 return None, "密码错误"
             
             # 更新最后登录时间
-            cursor.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', 
-                          (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s', (user_id,))
+            else:
+                cursor.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user_id,))
+            
             conn.commit()
             conn.close()
             
@@ -209,7 +351,7 @@ class DatabaseManager:
     def create_session(self, user_id, expires_hours=24):
         """创建用户会话"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             # 生成会话令牌
@@ -217,13 +359,18 @@ class DatabaseManager:
             expires_at = datetime.now() + timedelta(hours=expires_hours)
             
             # 清理过期会话
-            cursor.execute('DELETE FROM user_sessions WHERE expires_at < CURRENT_TIMESTAMP')
-            
-            # 插入新会话
-            cursor.execute('''
-                INSERT INTO user_sessions (user_id, session_token, expires_at)
-                VALUES (?, ?, ?)
-            ''', (user_id, session_token, expires_at))
+            if self.db_type == 'postgresql':
+                cursor.execute('DELETE FROM user_sessions WHERE expires_at < CURRENT_TIMESTAMP')
+                cursor.execute('''
+                    INSERT INTO user_sessions (user_id, session_token, expires_at)
+                    VALUES (%s, %s, %s)
+                ''', (user_id, session_token, expires_at))
+            else:
+                cursor.execute('DELETE FROM user_sessions WHERE expires_at < CURRENT_TIMESTAMP')
+                cursor.execute('''
+                    INSERT INTO user_sessions (user_id, session_token, expires_at)
+                    VALUES (?, ?, ?)
+                ''', (user_id, session_token, expires_at))
             
             conn.commit()
             conn.close()
@@ -236,15 +383,23 @@ class DatabaseManager:
     def validate_session(self, session_token):
         """验证会话令牌"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                SELECT s.user_id, u.username, u.email
-                FROM user_sessions s
-                JOIN users u ON s.user_id = u.id
-                WHERE s.session_token = ? AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = 1
-            ''', (session_token,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT s.user_id, u.username, u.email
+                    FROM user_sessions s
+                    JOIN users u ON s.user_id = u.id
+                    WHERE s.session_token = %s AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = TRUE
+                ''', (session_token,))
+            else:
+                cursor.execute('''
+                    SELECT s.user_id, u.username, u.email
+                    FROM user_sessions s
+                    JOIN users u ON s.user_id = u.id
+                    WHERE s.session_token = ? AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = 1
+                ''', (session_token,))
             
             result = cursor.fetchone()
             conn.close()
@@ -263,11 +418,14 @@ class DatabaseManager:
     def delete_session(self, session_token):
         """删除会话（登出）"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('DELETE FROM user_sessions WHERE session_token = ?', 
-                          (session_token,))
+            if self.db_type == 'postgresql':
+                cursor.execute('DELETE FROM user_sessions WHERE session_token = %s', (session_token,))
+            else:
+                cursor.execute('DELETE FROM user_sessions WHERE session_token = ?', (session_token,))
+            
             conn.commit()
             conn.close()
             
@@ -279,15 +437,10 @@ class DatabaseManager:
     def cleanup_expired_sessions(self):
         """清理所有过期会话"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 删除所有过期的会话
             cursor.execute('DELETE FROM user_sessions WHERE expires_at < CURRENT_TIMESTAMP')
-            
-            # 可选：也可以删除所有会话（用于彻底清除缓存问题）
-            # cursor.execute('DELETE FROM user_sessions')
-            
             conn.commit()
             conn.close()
             
@@ -299,14 +452,21 @@ class DatabaseManager:
     def get_user_by_id(self, user_id):
         """根据ID获取用户信息"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                SELECT id, username, email, created_at, last_login, profile_data
-                FROM users 
-                WHERE id = ? AND is_active = 1
-            ''', (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT id, username, email, created_at, last_login, profile_data
+                    FROM users 
+                    WHERE id = %s AND is_active = TRUE
+                ''', (user_id,))
+            else:
+                cursor.execute('''
+                    SELECT id, username, email, created_at, last_login, profile_data
+                    FROM users 
+                    WHERE id = ? AND is_active = 1
+                ''', (user_id,))
             
             result = cursor.fetchone()
             conn.close()
@@ -326,30 +486,46 @@ class DatabaseManager:
         except Exception as e:
             return None
     
-    # 用户数据操作方法
     def save_user_project(self, user_id, project_id, project_data):
         """保存用户项目"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             # 检查项目是否已存在
-            cursor.execute('SELECT id FROM user_projects WHERE user_id = ? AND project_id = ?',
-                          (user_id, project_id))
+            if self.db_type == 'postgresql':
+                cursor.execute('SELECT id FROM user_projects WHERE user_id = %s AND project_id = %s',
+                              (user_id, project_id))
+            else:
+                cursor.execute('SELECT id FROM user_projects WHERE user_id = ? AND project_id = ?',
+                              (user_id, project_id))
             
             if cursor.fetchone():
                 # 更新现有项目
-                cursor.execute('''
-                    UPDATE user_projects 
-                    SET project_data = ?, updated_at = CURRENT_TIMESTAMP
-                    WHERE user_id = ? AND project_id = ?
-                ''', (json.dumps(project_data), user_id, project_id))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        UPDATE user_projects 
+                        SET project_data = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE user_id = %s AND project_id = %s
+                    ''', (json.dumps(project_data), user_id, project_id))
+                else:
+                    cursor.execute('''
+                        UPDATE user_projects 
+                        SET project_data = ?, updated_at = CURRENT_TIMESTAMP
+                        WHERE user_id = ? AND project_id = ?
+                    ''', (json.dumps(project_data), user_id, project_id))
             else:
                 # 创建新项目
-                cursor.execute('''
-                    INSERT INTO user_projects (user_id, project_id, project_data)
-                    VALUES (?, ?, ?)
-                ''', (user_id, project_id, json.dumps(project_data)))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO user_projects (user_id, project_id, project_data)
+                        VALUES (%s, %s, %s)
+                    ''', (user_id, project_id, json.dumps(project_data)))
+                else:
+                    cursor.execute('''
+                        INSERT INTO user_projects (user_id, project_id, project_data)
+                        VALUES (?, ?, ?)
+                    ''', (user_id, project_id, json.dumps(project_data)))
             
             conn.commit()
             conn.close()
@@ -359,18 +535,25 @@ class DatabaseManager:
             return False
     
     def get_user_projects(self, user_id):
-        """获取用户所有项目 - 严格用户隔离"""
+        """获取用户所有项目"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 只获取指定用户的项目
-            cursor.execute('''
-                SELECT project_id, project_data, created_at, updated_at
-                FROM user_projects 
-                WHERE user_id = ?
-                ORDER BY updated_at DESC
-            ''', (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT project_id, project_data, created_at, updated_at
+                    FROM user_projects 
+                    WHERE user_id = %s
+                    ORDER BY updated_at DESC
+                ''', (user_id,))
+            else:
+                cursor.execute('''
+                    SELECT project_id, project_data, created_at, updated_at
+                    FROM user_projects 
+                    WHERE user_id = ?
+                    ORDER BY updated_at DESC
+                ''', (user_id,))
             
             results = cursor.fetchall()
             conn.close()
@@ -381,7 +564,7 @@ class DatabaseManager:
                     'data': json.loads(result[1]),
                     'created_at': result[2],
                     'updated_at': result[3],
-                    'owner_id': user_id  # 明确标记项目所有者
+                    'owner_id': user_id
                 }
             
             return projects
@@ -392,18 +575,47 @@ class DatabaseManager:
     def delete_user_project(self, user_id, project_id):
         """删除用户项目"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 删除指定的用户项目
-            cursor.execute('''
-                DELETE FROM user_projects 
-                WHERE user_id = ? AND project_id = ?
-            ''', (user_id, project_id))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    DELETE FROM user_projects 
+                    WHERE user_id = %s AND project_id = %s
+                ''', (user_id, project_id))
+            else:
+                cursor.execute('''
+                    DELETE FROM user_projects 
+                    WHERE user_id = ? AND project_id = ?
+                ''', (user_id, project_id))
             
-            # 检查是否删除了记录
             rows_affected = cursor.rowcount
+            conn.commit()
+            conn.close()
             
+            return rows_affected > 0
+            
+        except Exception as e:
+            return False
+    
+    def delete_user_file(self, user_id, file_id):
+        """删除用户文件记录"""
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    DELETE FROM user_files 
+                    WHERE user_id = %s AND id = %s
+                ''', (user_id, file_id))
+            else:
+                cursor.execute('''
+                    DELETE FROM user_files 
+                    WHERE user_id = ? AND id = ?
+                ''', (user_id, file_id))
+            
+            rows_affected = cursor.rowcount
             conn.commit()
             conn.close()
             
@@ -415,21 +627,32 @@ class DatabaseManager:
     def save_user_file(self, user_id, filename, original_filename, file_path=None, 
                        file_size=None, mime_type=None, tags=None, drive_file_id=None, 
                        drive_folder_id=None, storage_type='drive'):
-        """保存用户文件信息 - 支持Google Drive"""
+        """保存用户文件信息"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                INSERT INTO user_files 
-                (user_id, filename, original_filename, file_path, drive_file_id, 
-                 drive_folder_id, file_size, mime_type, tags, storage_type)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (user_id, filename, original_filename, file_path, drive_file_id,
-                  drive_folder_id, file_size, mime_type, 
-                  json.dumps(tags) if tags else None, storage_type))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO user_files 
+                    (user_id, filename, original_filename, file_path, drive_file_id, 
+                     drive_folder_id, file_size, mime_type, tags, storage_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+                ''', (user_id, filename, original_filename, file_path, drive_file_id,
+                      drive_folder_id, file_size, mime_type, 
+                      json.dumps(tags) if tags else None, storage_type))
+                file_id = cursor.fetchone()[0]
+            else:
+                cursor.execute('''
+                    INSERT INTO user_files 
+                    (user_id, filename, original_filename, file_path, drive_file_id, 
+                     drive_folder_id, file_size, mime_type, tags, storage_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (user_id, filename, original_filename, file_path, drive_file_id,
+                      drive_folder_id, file_size, mime_type, 
+                      json.dumps(tags) if tags else None, storage_type))
+                file_id = cursor.lastrowid
             
-            file_id = cursor.lastrowid
             conn.commit()
             conn.close()
             
@@ -440,18 +663,27 @@ class DatabaseManager:
             return None
     
     def get_user_files(self, user_id):
-        """获取用户所有文件 - 支持Google Drive"""
+        """获取用户所有文件"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                SELECT id, filename, original_filename, file_path, drive_file_id,
-                       drive_folder_id, file_size, mime_type, tags, uploaded_at, storage_type
-                FROM user_files 
-                WHERE user_id = ?
-                ORDER BY uploaded_at DESC
-            ''', (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT id, filename, original_filename, file_path, drive_file_id,
+                           drive_folder_id, file_size, mime_type, tags, uploaded_at, storage_type
+                    FROM user_files 
+                    WHERE user_id = %s
+                    ORDER BY uploaded_at DESC
+                ''', (user_id,))
+            else:
+                cursor.execute('''
+                    SELECT id, filename, original_filename, file_path, drive_file_id,
+                           drive_folder_id, file_size, mime_type, tags, uploaded_at, storage_type
+                    FROM user_files 
+                    WHERE user_id = ?
+                    ORDER BY uploaded_at DESC
+                ''', (user_id,))
             
             results = cursor.fetchall()
             conn.close()
@@ -482,17 +714,26 @@ class DatabaseManager:
                          message_content, context_data=None):
         """保存聊天消息"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                INSERT INTO user_chat_history 
-                (user_id, conversation_id, message_type, message_content, context_data)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (user_id, conversation_id, message_type, message_content,
-                  json.dumps(context_data) if context_data else None))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    INSERT INTO user_chat_history 
+                    (user_id, conversation_id, message_type, message_content, context_data)
+                    VALUES (%s, %s, %s, %s, %s) RETURNING id
+                ''', (user_id, conversation_id, message_type, message_content,
+                      json.dumps(context_data) if context_data else None))
+                message_id = cursor.fetchone()[0]
+            else:
+                cursor.execute('''
+                    INSERT INTO user_chat_history 
+                    (user_id, conversation_id, message_type, message_content, context_data)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (user_id, conversation_id, message_type, message_content,
+                      json.dumps(context_data) if context_data else None))
+                message_id = cursor.lastrowid
             
-            message_id = cursor.lastrowid
             conn.commit()
             conn.close()
             
@@ -502,30 +743,49 @@ class DatabaseManager:
             return None
     
     def get_user_chat_history(self, user_id, conversation_id=None, limit=100):
-        """获取用户聊天记录 - 增强隐私保护"""
+        """获取用户聊天记录"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 确保只能访问指定用户的聊天记录
             if conversation_id:
-                cursor.execute('''
-                    SELECT id, conversation_id, message_type, message_content, 
-                           context_data, created_at
-                    FROM user_chat_history 
-                    WHERE user_id = ? AND conversation_id = ?
-                    ORDER BY created_at DESC
-                    LIMIT ?
-                ''', (user_id, conversation_id, limit))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT id, conversation_id, message_type, message_content, 
+                               context_data, created_at
+                        FROM user_chat_history 
+                        WHERE user_id = %s AND conversation_id = %s
+                        ORDER BY created_at DESC
+                        LIMIT %s
+                    ''', (user_id, conversation_id, limit))
+                else:
+                    cursor.execute('''
+                        SELECT id, conversation_id, message_type, message_content, 
+                               context_data, created_at
+                        FROM user_chat_history 
+                        WHERE user_id = ? AND conversation_id = ?
+                        ORDER BY created_at DESC
+                        LIMIT ?
+                    ''', (user_id, conversation_id, limit))
             else:
-                cursor.execute('''
-                    SELECT id, conversation_id, message_type, message_content, 
-                           context_data, created_at
-                    FROM user_chat_history 
-                    WHERE user_id = ?
-                    ORDER BY created_at DESC
-                    LIMIT ?
-                ''', (user_id, limit))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        SELECT id, conversation_id, message_type, message_content, 
+                               context_data, created_at
+                        FROM user_chat_history 
+                        WHERE user_id = %s
+                        ORDER BY created_at DESC
+                        LIMIT %s
+                    ''', (user_id, limit))
+                else:
+                    cursor.execute('''
+                        SELECT id, conversation_id, message_type, message_content, 
+                               context_data, created_at
+                        FROM user_chat_history 
+                        WHERE user_id = ?
+                        ORDER BY created_at DESC
+                        LIMIT ?
+                    ''', (user_id, limit))
             
             results = cursor.fetchall()
             conn.close()
@@ -539,7 +799,7 @@ class DatabaseManager:
                     'message_content': result[3],
                     'context_data': json.loads(result[4]) if result[4] else None,
                     'created_at': result[5],
-                    'user_id': user_id  # 明确标记数据所有者
+                    'user_id': user_id
                 })
             
             return messages
@@ -548,23 +808,33 @@ class DatabaseManager:
             return []
     
     def delete_user_chat_history(self, user_id, conversation_id=None):
-        """删除用户聊天记录 - 仅限用户自己的数据"""
+        """删除用户聊天记录"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             if conversation_id:
-                # 删除特定会话的记录
-                cursor.execute('''
-                    DELETE FROM user_chat_history 
-                    WHERE user_id = ? AND conversation_id = ?
-                ''', (user_id, conversation_id))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        DELETE FROM user_chat_history 
+                        WHERE user_id = %s AND conversation_id = %s
+                    ''', (user_id, conversation_id))
+                else:
+                    cursor.execute('''
+                        DELETE FROM user_chat_history 
+                        WHERE user_id = ? AND conversation_id = ?
+                    ''', (user_id, conversation_id))
             else:
-                # 删除用户所有聊天记录
-                cursor.execute('''
-                    DELETE FROM user_chat_history 
-                    WHERE user_id = ?
-                ''', (user_id,))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        DELETE FROM user_chat_history 
+                        WHERE user_id = %s
+                    ''', (user_id,))
+                else:
+                    cursor.execute('''
+                        DELETE FROM user_chat_history 
+                        WHERE user_id = ?
+                    ''', (user_id,))
             
             rows_affected = cursor.rowcount
             conn.commit()
@@ -578,23 +848,37 @@ class DatabaseManager:
     def save_user_note(self, user_id, title, content, topic=None, note_id=None):
         """保存用户笔记"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
             if note_id:
                 # Update existing note
-                cursor.execute('''
-                    UPDATE user_notes 
-                    SET title = ?, content = ?, tags = ?, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = ? AND user_id = ?
-                ''', (title, content, json.dumps({'topic': topic}) if topic else None, note_id, user_id))
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        UPDATE user_notes 
+                        SET title = %s, content = %s, tags = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s AND user_id = %s
+                    ''', (title, content, json.dumps({'topic': topic}) if topic else None, note_id, user_id))
+                else:
+                    cursor.execute('''
+                        UPDATE user_notes 
+                        SET title = ?, content = ?, tags = ?, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ? AND user_id = ?
+                    ''', (title, content, json.dumps({'topic': topic}) if topic else None, note_id, user_id))
             else:
                 # Create new note
-                cursor.execute('''
-                    INSERT INTO user_notes (user_id, title, content, tags)
-                    VALUES (?, ?, ?, ?)
-                ''', (user_id, title, content, json.dumps({'topic': topic}) if topic else None))
-                note_id = cursor.lastrowid
+                if self.db_type == 'postgresql':
+                    cursor.execute('''
+                        INSERT INTO user_notes (user_id, title, content, tags)
+                        VALUES (%s, %s, %s, %s) RETURNING id
+                    ''', (user_id, title, content, json.dumps({'topic': topic}) if topic else None))
+                    note_id = cursor.fetchone()[0]
+                else:
+                    cursor.execute('''
+                        INSERT INTO user_notes (user_id, title, content, tags)
+                        VALUES (?, ?, ?, ?)
+                    ''', (user_id, title, content, json.dumps({'topic': topic}) if topic else None))
+                    note_id = cursor.lastrowid
             
             conn.commit()
             conn.close()
@@ -605,18 +889,25 @@ class DatabaseManager:
             return None
     
     def get_user_notes(self, user_id):
-        """获取用户笔记 - 严格用户隔离"""
+        """获取用户笔记"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 只获取指定用户的笔记
-            cursor.execute('''
-                SELECT id, title, content, tags, created_at, updated_at
-                FROM user_notes 
-                WHERE user_id = ?
-                ORDER BY updated_at DESC
-            ''', (user_id,))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    SELECT id, title, content, tags, created_at, updated_at
+                    FROM user_notes 
+                    WHERE user_id = %s
+                    ORDER BY updated_at DESC
+                ''', (user_id,))
+            else:
+                cursor.execute('''
+                    SELECT id, title, content, tags, created_at, updated_at
+                    FROM user_notes 
+                    WHERE user_id = ?
+                    ORDER BY updated_at DESC
+                ''', (user_id,))
             
             results = cursor.fetchall()
             conn.close()
@@ -630,7 +921,7 @@ class DatabaseManager:
                     'tags': json.loads(result[3]) if result[3] else [],
                     'created_at': result[4],
                     'updated_at': result[5],
-                    'owner_id': user_id  # 明确标记笔记所有者
+                    'owner_id': user_id
                 })
             
             return notes
@@ -641,13 +932,19 @@ class DatabaseManager:
     def delete_user_note(self, user_id, note_id):
         """删除用户笔记"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
-            cursor.execute('''
-                DELETE FROM user_notes 
-                WHERE id = ? AND user_id = ?
-            ''', (note_id, user_id))
+            if self.db_type == 'postgresql':
+                cursor.execute('''
+                    DELETE FROM user_notes 
+                    WHERE id = %s AND user_id = %s
+                ''', (note_id, user_id))
+            else:
+                cursor.execute('''
+                    DELETE FROM user_notes 
+                    WHERE id = ? AND user_id = ?
+                ''', (note_id, user_id))
             
             success = cursor.rowcount > 0
             conn.commit()
@@ -662,28 +959,30 @@ class DatabaseManager:
     def verify_resource_ownership(self, user_id, resource_type, resource_id):
         """验证用户是否拥有指定资源的访问权限"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
+            placeholder = '%s' if self.db_type == 'postgresql' else '?'
+            
             if resource_type == 'project':
-                cursor.execute('''
+                cursor.execute(f'''
                     SELECT user_id FROM user_projects 
-                    WHERE project_id = ? AND user_id = ?
+                    WHERE project_id = {placeholder} AND user_id = {placeholder}
                 ''', (resource_id, user_id))
             elif resource_type == 'note':
-                cursor.execute('''
+                cursor.execute(f'''
                     SELECT user_id FROM user_notes 
-                    WHERE id = ? AND user_id = ?
+                    WHERE id = {placeholder} AND user_id = {placeholder}
                 ''', (resource_id, user_id))
             elif resource_type == 'file':
-                cursor.execute('''
+                cursor.execute(f'''
                     SELECT user_id FROM user_files 
-                    WHERE id = ? AND user_id = ?
+                    WHERE id = {placeholder} AND user_id = {placeholder}
                 ''', (resource_id, user_id))
             elif resource_type == 'chat':
-                cursor.execute('''
+                cursor.execute(f'''
                     SELECT user_id FROM user_chat_history 
-                    WHERE id = ? AND user_id = ?
+                    WHERE id = {placeholder} AND user_id = {placeholder}
                 ''', (resource_id, user_id))
             else:
                 return False
@@ -697,33 +996,27 @@ class DatabaseManager:
             return False
 
     def get_user_statistics(self, user_id):
-        """获取用户统计信息 - 仅限用户自己的数据"""
+        """获取用户统计信息"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self.get_connection()
             cursor = conn.cursor()
             
+            placeholder = '%s' if self.db_type == 'postgresql' else '?'
+            
             # 获取聊天消息统计
-            cursor.execute('''
-                SELECT COUNT(*) FROM user_chat_history WHERE user_id = ?
-            ''', (user_id,))
+            cursor.execute(f'SELECT COUNT(*) FROM user_chat_history WHERE user_id = {placeholder}', (user_id,))
             total_messages = cursor.fetchone()[0]
             
             # 获取项目统计
-            cursor.execute('''
-                SELECT COUNT(*) FROM user_projects WHERE user_id = ?
-            ''', (user_id,))
+            cursor.execute(f'SELECT COUNT(*) FROM user_projects WHERE user_id = {placeholder}', (user_id,))
             total_projects = cursor.fetchone()[0]
             
             # 获取笔记统计
-            cursor.execute('''
-                SELECT COUNT(*) FROM user_notes WHERE user_id = ?
-            ''', (user_id,))
+            cursor.execute(f'SELECT COUNT(*) FROM user_notes WHERE user_id = {placeholder}', (user_id,))
             total_notes = cursor.fetchone()[0]
             
             # 获取文件统计
-            cursor.execute('''
-                SELECT COUNT(*) FROM user_files WHERE user_id = ?
-            ''', (user_id,))
+            cursor.execute(f'SELECT COUNT(*) FROM user_files WHERE user_id = {placeholder}', (user_id,))
             total_files = cursor.fetchone()[0]
             
             conn.close()

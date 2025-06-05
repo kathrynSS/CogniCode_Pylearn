@@ -1,21 +1,28 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "app.py",
-      "use": "@vercel/python"
+      "src": "server.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "app.py"
+      "dest": "server.py"
     },
     {
       "src": "/(.*)",
-      "dest": "app.py"
+      "dest": "server.py"
     }
   ],
+  "functions": {
+    "server.py": {
+      "maxDuration": 30
+    }
+  },
   "env": {
     "PYTHONPATH": "."
   }
