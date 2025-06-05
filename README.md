@@ -96,7 +96,7 @@ capstone/
 ├── vercel.json                # Vercel deployment config
 ├── requirements.txt           # Python dependencies
 └── .vercelignore              # Files to ignore during deployment
-</div>
+```
 
 
 ### Core Stack
