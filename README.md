@@ -20,7 +20,8 @@ https://github.com/user-attachments/assets/95d14092-969a-4d76-80ef-58bbf14656cd
 *Explore how the visual knowledge graph works in CogniCode.*
 
 **AI Chatbot Learning Assistant**  
-https://img.shields.io/badge/Watch%20Video-Chatbot%20Assistant-green?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1uQW-4hvsNbHJRXz2x8EKiqW2GXY-g2Ys/view?usp=sharing
+
+https://github.com/user-attachments/assets/0eb4c110-4a3b-4f22-a506-85a0b8233afc
 
 *See the AI-powered chatbot in action, guiding learners step by step.*
 
