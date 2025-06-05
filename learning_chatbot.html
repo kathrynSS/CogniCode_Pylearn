@@ -1595,56 +1595,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 隐私设置开关样式 */
-        .privacy-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
 
-        .privacy-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .privacy-switch .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 26px;
-        }
-
-        .privacy-switch .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        .privacy-switch input:checked + .slider {
-            background-color: #1976d2;
-        }
-
-        .privacy-switch input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        .privacy-switch input:disabled + .slider {
-            background-color: #4caf50;
-            cursor: not-allowed;
-        }
 
         /* 统计卡片样式 */
         .stat-card {
@@ -1673,18 +1624,7 @@
             font-weight: 500;
         }
 
-        /* 隐私设置面板样式 */
-        .privacy-setting {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            transition: border-color 0.3s ease;
-        }
 
-        .privacy-setting:hover {
-            border-color: #1976d2;
-        }
 
         /* 确认对话框样式 */
         .confirm-dialog {
@@ -2558,60 +2498,57 @@
     <div id="chatHistoryModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
-                <h2><i class="fas fa-history"></i> 聊天历史 & 数据管理</h2>
+                <h2><i class="fas fa-history"></i> Chat History & Data Management</h2>
                 <span class="close" onclick="hideChatHistoryModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- 用户数据隔离提示 -->
+                <!-- User data isolation notice -->
                 <div id="userDataNotice" style="display: none; margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd, #f3e5f5); border-left: 4px solid #1976d2; border-radius: 6px;">
                     <div style="display: flex; align-items: center; margin-bottom: 10px;">
                         <i class="fas fa-shield-alt" style="color: #1976d2; margin-right: 10px; font-size: 16px;"></i>
-                        <strong style="color: #1976d2;">您的数据是私密和安全的</strong>
+                        <strong style="color: #1976d2;">Your data is private and secure</strong>
                     </div>
                     <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">
-                        ✅ 只有您能看到自己的聊天记录和创建的项目<br>
-                        ✅ 您的数据与其他用户完全隔离<br>
-                        ✅ 您可以随时删除或导出自己的数据
+                        ✅ Only you can see your own chat records and created projects<br>
+                        ✅ Your data is completely isolated from other users<br>
+                        ✅ You can delete or export your data at any time
                     </p>
                 </div>
                 
-                <!-- 匿名用户提示 -->
+                <!-- Anonymous user notice -->
                 <div id="anonymousUserNotice" style="display: none; margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #fff3e0, #fce4ec); border-left: 4px solid #ff9800; border-radius: 6px;">
                     <div style="display: flex; align-items: center; margin-bottom: 10px;">
                         <i class="fas fa-user-secret" style="color: #ff9800; margin-right: 10px; font-size: 16px;"></i>
-                        <strong style="color: #ff9800;">匿名用户模式</strong>
+                        <strong style="color: #ff9800;">Anonymous User Mode</strong>
                     </div>
                     <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">
-                        💡 您当前以匿名模式使用，聊天记录仅保存在本地浏览器中<br>
-                        🔐 <a href="auth.html" style="color: #1976d2; text-decoration: none;">登录或注册</a> 以享受云端数据同步和完整的隐私保护功能
+                        💡 You are currently using anonymous mode, chat records are only saved in your local browser<br>
+                        🔐 <a href="auth.html" style="color: #1976d2; text-decoration: none;">Login or Register</a> to enjoy cloud data sync and complete privacy protection features
                     </p>
                 </div>
                 
-                <!-- 标签页导航 -->
+                <!-- Tab navigation -->
                 <div class="history-tabs" style="margin-bottom: 20px;">
                     <button class="tab-btn active" onclick="switchDataTab('history')">
-                        <i class="fas fa-comments"></i> 聊天记录
+                        <i class="fas fa-comments"></i> Chat Records
                     </button>
                     <button class="tab-btn" onclick="switchDataTab('statistics')" id="statisticsTab" style="display: none;">
-                        <i class="fas fa-chart-bar"></i> 数据统计
-                    </button>
-                    <button class="tab-btn" onclick="switchDataTab('privacy')" id="privacyTab" style="display: none;">
-                        <i class="fas fa-user-shield"></i> 隐私设置
+                        <i class="fas fa-chart-bar"></i> Data Statistics
                     </button>
                 </div>
                 
-                <!-- 聊天历史标签页 -->
+                <!-- Chat history tab -->
                 <div id="historyTabContent" class="tab-content">
                     <div class="history-controls">
                         <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: flex-end; flex-wrap: wrap;">
                             <button onclick="exportChatHistory()" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                <i class="fas fa-download"></i> 导出数据
+                                <i class="fas fa-download"></i> Export Data
                             </button>
                             <button onclick="showClearHistoryConfirm()" style="padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                <i class="fas fa-trash"></i> 清除记录
+                                <i class="fas fa-trash"></i> Clear Records
                             </button>
                             <button onclick="refreshChatHistory()" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                <i class="fas fa-sync"></i> 刷新
+                                <i class="fas fa-sync"></i> Refresh
                             </button>
                         </div>
                     </div>
@@ -2621,104 +2558,52 @@
                     </div>
                 </div>
                 
-                <!-- 数据统计标签页 -->
+                <!-- Data statistics tab -->
                 <div id="statisticsTabContent" class="tab-content" style="display: none;">
                     <div id="userStatistics">
                         <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
                             <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
                                 <i class="fas fa-comments" style="font-size: 24px; color: #007bff; margin-bottom: 10px;"></i>
                                 <div class="stat-number" id="statMessages">-</div>
-                                <div class="stat-label">聊天消息</div>
+                                <div class="stat-label">Chat Messages</div>
                             </div>
                             <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
                                 <i class="fas fa-project-diagram" style="font-size: 24px; color: #28a745; margin-bottom: 10px;"></i>
                                 <div class="stat-number" id="statProjects">-</div>
-                                <div class="stat-label">创建项目</div>
+                                <div class="stat-label">Created Projects</div>
                             </div>
                             <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
                                 <i class="fas fa-sticky-note" style="font-size: 24px; color: #ffc107; margin-bottom: 10px;"></i>
                                 <div class="stat-number" id="statNotes">-</div>
-                                <div class="stat-label">学习笔记</div>
+                                <div class="stat-label">Learning Notes</div>
                             </div>
                             <div class="stat-card" style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
                                 <i class="fas fa-file" style="font-size: 24px; color: #dc3545; margin-bottom: 10px;"></i>
                                 <div class="stat-number" id="statFiles">-</div>
-                                <div class="stat-label">上传文件</div>
+                                <div class="stat-label">Uploaded Files</div>
                             </div>
                         </div>
                         <div id="statisticsMessage" style="text-align: center; color: #666; font-style: italic;"></div>
                     </div>
                 </div>
                 
-                <!-- 隐私设置标签页 -->
-                <div id="privacyTabContent" class="tab-content" style="display: none;">
-                    <div id="privacySettings">
-                        <div style="margin-bottom: 30px;">
-                            <h3 style="color: #333; margin-bottom: 15px;">
-                                <i class="fas fa-user-shield"></i> 数据隐私控制
-                            </h3>
-                            <div class="privacy-setting" style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>数据隔离</strong>
-                                        <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">确保您的数据只有您自己能看到</p>
-                                    </div>
-                                    <label class="privacy-switch">
-                                        <input type="checkbox" id="dataIsolationSwitch" checked disabled>
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="privacy-setting" style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>允许数据导出</strong>
-                                        <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">允许您导出自己的所有数据</p>
-                                    </div>
-                                    <label class="privacy-switch">
-                                        <input type="checkbox" id="dataExportSwitch" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="privacy-setting" style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px;">
-                                <div>
-                                    <strong>聊天记录保留时间</strong>
-                                    <p style="margin: 5px 0 10px 0; color: #666; font-size: 14px;">设置聊天记录自动删除时间</p>
-                                    <select id="retentionDaysSelect" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-                                        <option value="30">30天</option>
-                                        <option value="90">90天</option>
-                                        <option value="365" selected>1年</option>
-                                        <option value="-1">永久保留</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="text-align: center; margin-top: 20px;">
-                                <button onclick="savePrivacySettings()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                    <i class="fas fa-save"></i> 保存设置
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 数据统计显示区域 -->
+                <!-- Data statistics display area -->
                 <div class="history-stats" style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                     <div class="stat-item">
                         <strong id="totalMessages">0</strong>
-                        <span>总消息</span>
+                        <span>Total Messages</span>
                     </div>
                     <div class="stat-item">
                         <strong id="userMessages">0</strong>
-                        <span>用户消息</span>
+                        <span>User Messages</span>
                     </div>
                     <div class="stat-item">
                         <strong id="botMessages">0</strong>
-                        <span>AI回复</span>
+                        <span>AI Replies</span>
                     </div>
                     <div class="stat-item">
                         <strong id="currentSession">0</strong>
-                        <span>当前会话</span>
+                        <span>Current Session</span>
                     </div>
                 </div>
                 
@@ -4796,16 +4681,14 @@
             updateHistoryStats();
             displaySessionsList();
             
-            // 如果用户已登录，加载统计数据和隐私设置
+            // If user is logged in, load statistics data
             if (isLoggedIn) {
                 loadUserStatistics();
-                loadPrivacySettings();
                 document.getElementById('statisticsTab').style.display = 'block';
-                document.getElementById('privacyTab').style.display = 'block';
             }
         }
         
-        // 检查并显示用户数据提示
+        // Check and show user data notice
         function checkAndShowUserNotice() {
             const userNotice = document.getElementById('userDataNotice');
             const anonymousNotice = document.getElementById('anonymousUserNotice');
@@ -4819,36 +4702,34 @@
             }
         }
 
-        // 切换数据管理标签页
+        // Switch data management tabs
         function switchDataTab(tabName) {
-            // 隐藏所有标签页内容
+            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.style.display = 'none';
             });
             
-            // 移除所有活动状态
+            // Remove all active states
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 显示选中的标签页
+            // Show selected tab
             const targetTab = document.getElementById(tabName + 'TabContent');
             if (targetTab) {
                 targetTab.style.display = 'block';
             }
             
-            // 设置按钮为活动状态
+            // Set button to active state
             event.target.classList.add('active');
             
-            // 根据标签页类型加载相应数据
+            // Load corresponding data based on tab type
             if (tabName === 'statistics' && isLoggedIn) {
                 loadUserStatistics();
-            } else if (tabName === 'privacy' && isLoggedIn) {
-                loadPrivacySettings();
             }
         }
         
-        // 加载用户统计数据
+        // Load user statistics data
         async function loadUserStatistics() {
             try {
                 const response = await fetch('/api/user/statistics', {
@@ -4866,104 +4747,50 @@
                         
                         document.getElementById('statisticsMessage').textContent = '';
                     } else {
-                        document.getElementById('statisticsMessage').textContent = '加载统计数据失败';
+                        document.getElementById('statisticsMessage').textContent = 'Failed to load statistics data';
                     }
                 } else {
-                    document.getElementById('statisticsMessage').textContent = '无法获取统计数据';
+                    document.getElementById('statisticsMessage').textContent = 'Unable to retrieve statistics data';
                 }
             } catch (error) {
                 console.error('Error loading statistics:', error);
-                document.getElementById('statisticsMessage').textContent = '网络错误，无法加载统计数据';
+                document.getElementById('statisticsMessage').textContent = 'Network error, unable to load statistics data';
             }
         }
 
-        // 加载隐私设置
-        async function loadPrivacySettings() {
-            try {
-                const response = await fetch('/api/user/privacy-settings', {
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        const settings = data.privacy_settings;
-                        
-                        document.getElementById('dataIsolationSwitch').checked = settings.data_isolation !== false;
-                        document.getElementById('dataExportSwitch').checked = settings.allow_data_export !== false;
-                        document.getElementById('retentionDaysSelect').value = settings.chat_history_retention_days || 365;
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading privacy settings:', error);
-            }
-        }
 
-        // 保存隐私设置
-        async function savePrivacySettings() {
-            try {
-                const settings = {
-                    data_isolation: document.getElementById('dataIsolationSwitch').checked,
-                    allow_data_export: document.getElementById('dataExportSwitch').checked,
-                    chat_history_retention_days: parseInt(document.getElementById('retentionDaysSelect').value)
-                };
-                
-                const response = await fetch('/api/user/privacy-settings', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ privacy_settings: settings })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        alert('隐私设置保存成功！');
-                    } else {
-                        alert('保存失败：' + data.error);
-                    }
-                } else {
-                    alert('保存隐私设置失败');
-                }
-            } catch (error) {
-                console.error('Error saving privacy settings:', error);
-                alert('网络错误，保存失败');
-            }
-        }
 
-        // 刷新聊天历史
+        // Refresh chat history
         async function refreshChatHistory() {
             if (isLoggedIn) {
-                // 重新从服务器加载聊天历史
+                // Reload chat history from server
                 await loadChatHistoryFromServer();
                 displaySessionsList();
                 updateHistoryStats();
             } else {
-                // 刷新本地聊天历史显示
+                // Refresh local chat history display
                 displaySessionsList();
                 updateHistoryStats();
             }
         }
 
-        // 显示清除历史确认对话框
+        // Show clear history confirmation dialog
         function showClearHistoryConfirm() {
             const dialog = document.createElement('div');
             dialog.className = 'confirm-dialog';
             dialog.innerHTML = `
                 <div class="confirm-content">
                     <h3 style="color: #dc3545; margin-bottom: 15px;">
-                        <i class="fas fa-exclamation-triangle"></i> 确认删除
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
                     </h3>
-                    <p>您确定要删除所有聊天记录吗？</p>
-                    <p style="color: #666; font-size: 14px;">此操作不可撤销。</p>
+                    <p>Are you sure you want to delete all chat records?</p>
+                    <p style="color: #666; font-size: 14px;">This action cannot be undone.</p>
                     <div class="confirm-buttons">
                         <button class="confirm-btn danger" onclick="confirmClearHistory()">
-                            <i class="fas fa-trash"></i> 确认删除
+                            <i class="fas fa-trash"></i> Confirm Delete
                         </button>
                         <button class="confirm-btn secondary" onclick="closeClearHistoryConfirm()">
-                            <i class="fas fa-times"></i> 取消
+                            <i class="fas fa-times"></i> Cancel
                         </button>
                     </div>
                 </div>
@@ -4972,11 +4799,11 @@
             document.body.appendChild(dialog);
         }
 
-        // 确认清除历史
+        // Confirm clear history
         async function confirmClearHistory() {
             try {
                 if (isLoggedIn) {
-                    // 为登录用户删除服务器端数据
+                    // Delete server-side data for logged-in users
                     const response = await fetch('/api/user/chat-history', {
                         method: 'DELETE',
                         headers: {
@@ -4988,44 +4815,44 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            // 清除本地缓存
+                            // Clear local cache
                             chatSessions = [];
                             chatHistory = [];
                             currentSessionId = null;
                             
-                            // 清除聊天显示
+                            // Clear chat display
                             document.getElementById('chatMessages').innerHTML = `
                                 <div class="message bot">
                                     <div class="message-content">
-                                         聊天历史已清除！我们可以开始新的学习对话。
+                                         Chat history has been cleared! Let's start a new learning conversation.
                                     </div>
                                 </div>
                             `;
                             
-                            // 刷新显示
+                            // Refresh display
                             updateRecentSessions();
                             updateHistoryStats();
                             startNewChatSession();
                             
-                            alert('聊天记录删除成功！');
+                            alert('Chat history deleted successfully!');
                         } else {
-                            alert('删除失败：' + data.error);
+                            alert('Delete failed: ' + data.error);
                         }
                     } else {
-                        alert('删除聊天记录失败');
+                        alert('Failed to delete chat history');
                     }
                 } else {
-                    // 非登录用户清除本地数据
+                    // Clear local data for non-logged-in users
                     chatSessions = [];
                     chatHistory = [];
                     currentSessionId = null;
                     localStorage.removeItem('chatSessions');
                     
-                    // 清除聊天显示
+                    // Clear chat display
                     document.getElementById('chatMessages').innerHTML = `
                         <div class="message bot">
                             <div class="message-content">
-                                聊天历史已清除！我们可以开始新的学习对话。
+                                Chat history has been cleared! Let's start a new learning conversation.
                             </div>
                         </div>
                     `;
@@ -5034,17 +4861,17 @@
                     updateHistoryStats();
                     startNewChatSession();
                     
-                    alert('本地聊天记录删除成功！');
+                    alert('Local chat history deleted successfully!');
                 }
             } catch (error) {
                 console.error('Error clearing chat history:', error);
-                alert('删除聊天记录时发生错误');
+                alert('An error occurred while deleting chat history');
             } finally {
                 closeClearHistoryConfirm();
             }
         }
 
-        // 关闭清除历史确认对话框
+        // Close clear history confirmation dialog
         function closeClearHistoryConfirm() {
             const dialog = document.querySelector('.confirm-dialog');
             if (dialog) {
