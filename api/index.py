@@ -286,157 +286,87 @@ def generate_file_tags(filename):
 def format_markdown_text(text):
     """
     将markdown格式的文本转换为符合新设计系统的HTML
-    修复版本：改善处理顺序，避免格式冲突
+    优化版本：简化处理流程，提高效率，添加错误处理
     """
     if not text or not isinstance(text, str):
         return ""
     
-    # 转义HTML特殊字符，但保留我们要处理的markdown符号
-    text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-    
-    # Step 1: 处理代码块（最高优先级，避免内容被其他规则处理）
-    code_blocks = []
-    def replace_code_block(match):
-        language = match.group(1) if match.group(1) else 'text'
-        code = match.group(2) if len(match.groups()) >= 2 else ''
-        # 恢复代码块中的HTML转义
-        code = code.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
-        code_blocks.append((code, language))
-        return f"CODE_BLOCK_PLACEHOLDER_{len(code_blocks) - 1}"
+    try:
+        # 转义HTML特殊字符，但保留我们要处理的markdown符号
+        text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        
+        # Step 1: 处理代码块（最高优先级）
+        code_blocks = []
+        def replace_code_block(match):
+            language = match.group(1) if match.group(1) else 'text'
+            code = match.group(2) if len(match.groups()) >= 2 else ''
+            code = code.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+            code_blocks.append((code, language))
+            return f"CODE_BLOCK_PLACEHOLDER_{len(code_blocks) - 1}"
 
-    # 匹配三重反引号代码块 - 修复版本，更灵活的匹配
-    text = re.sub(r'```(\w*)\s*(.*?)\s*```', replace_code_block, text, flags=re.DOTALL)
-    
-    # Step 2: 处理行内代码（避免被其他规则干扰）
-    inline_codes = []
-    def replace_inline_code(match):
-        code = match.group(1)
-        # 恢复代码中的HTML转义
-        code = code.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
-        inline_codes.append(code)
-        return f"INLINE_CODE_PLACEHOLDER_{len(inline_codes) - 1}"
-    
-    text = re.sub(r'`([^`\n]+)`', replace_inline_code, text)
-    
-    # Step 3: 处理标题（按优先级处理）- 在换行处理之前
-    # 处理带emoji的主标题
-    text = re.sub(r'^##\s+([🎯🔍🐛📋🎓🚀✨💡📚🔗⚠️💪📖📊🎨🤖].*?)$', 
-                 r'<div class="answer-section"><div class="section-header"><h2 class="section-title"><span class="emoji">\1</span></h2><div class="section-line"></div></div><div class="section-content">', text, flags=re.MULTILINE)
-    
-    # 处理带emoji的子标题
-    text = re.sub(r'^###\s+([📌💡💻🔍📚🔗⚠️💪📖❌✅💡🚫🎯🔧📊⚡].*?)$', 
-                 r'<div class="subsection-header"><h3 class="subsection-title">\1</h3><div class="subsection-accent"></div></div>', text, flags=re.MULTILINE)
-    
-    # 处理普通二级标题
-    text = re.sub(r'^##\s+(.+?)$', 
-                 r'<div class="answer-section"><div class="section-header"><h2 class="section-title">\1</h2><div class="section-line"></div></div><div class="section-content">', text, flags=re.MULTILINE)
-    
-    # 处理普通三级标题
-    text = re.sub(r'^###\s+(.+?)$', 
-                 r'<div class="subsection-header"><h3 class="subsection-title">\1</h3><div class="subsection-accent"></div></div>', text, flags=re.MULTILINE)
-    
-    # 处理步骤标题
-    text = re.sub(r'#{2,}\s+Step\s+(\d+):?\s*(.*?)(?=\n|$)', 
-                 r'<div class="step-container"><div class="step-number">\1</div><h3 class="step-heading">\2</h3></div>', text)
-    
-    # Step 4: 处理状态指示器和徽章（在换行处理之前）
-    status_patterns = {
-        r'✅\s*([^\n]+)': r'<span class="status-badge status-success"><span class="badge-icon">✅</span><span class="badge-text">\1</span></span>',
-        r'⚠️\s*([^\n]+)': r'<span class="status-badge status-warning"><span class="badge-icon">⚠️</span><span class="badge-text">\1</span></span>',
-        r'❌\s*([^\n]+)': r'<span class="status-badge status-error"><span class="badge-icon">❌</span><span class="badge-text">\1</span></span>',
-        r'💡\s*([^\n]+)': r'<span class="status-badge status-info"><span class="badge-icon">💡</span><span class="badge-text">\1</span></span>',
-        r'🔴\s*([^\n]+)': r'<span class="status-badge status-error"><span class="badge-icon">🔴</span><span class="badge-text">\1</span></span>',
-        r'🟡\s*([^\n]+)': r'<span class="status-badge status-warning"><span class="badge-icon">🟡</span><span class="badge-text">\1</span></span>',
-        r'🟢\s*([^\n]+)': r'<span class="status-badge status-success"><span class="badge-icon">🟢</span><span class="badge-text">\1</span></span>',
-    }
-    
-    for pattern, replacement in status_patterns.items():
-        text = re.sub(pattern, replacement, text)
-    
-    # Step 5: 处理粗体和斜体
-    # 处理粗体
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong class="enhanced-bold">\1</strong>', text)
-    # 处理斜体
-    text = re.sub(r'\*(.*?)\*', r'<em class="enhanced-italic">\1</em>', text)
-    
-    # Step 6: 处理列表（在换行处理之前）
-    # 处理无序列表
-    text = re.sub(r'^\s*-\s+(.*?)$', r'<li class="enhanced-bullet-item"><span class="bullet-icon">▸</span><span class="bullet-text">\1</span></li>', text, flags=re.MULTILINE)
-    
-    # 将连续的列表项包装在ul中
-    text = re.sub(r'(<li class="enhanced-bullet-item">.*?</li>\s*)+', 
-                 lambda m: f'<ul class="enhanced-bullet-list">{m.group(0)}</ul>', text, flags=re.DOTALL)
-    
-    # Step 7: 处理特殊框（在换行处理之前）
-    highlight_patterns = {
-        r'💡\s*提示[：:]\s*(.*?)(?=\n\n|\n$|$)': r'<div class="highlight-box tip"><span class="highlight-icon">💡</span><div class="highlight-text">\1</div></div>',
-        r'⚠️\s*警告[：:]\s*(.*?)(?=\n\n|\n$|$)': r'<div class="highlight-box warning"><span class="highlight-icon">⚠️</span><div class="highlight-text">\1</div></div>',
-        r'✅\s*成功[：:]\s*(.*?)(?=\n\n|\n$|$)': r'<div class="highlight-box success"><span class="highlight-icon">✅</span><div class="highlight-text">\1</div></div>',
-    }
-    
-    for pattern, replacement in highlight_patterns.items():
-        text = re.sub(pattern, replacement, text, flags=re.DOTALL)
-    
-    # Step 8: 处理信息卡片（在换行处理之前）
-    text = re.sub(r'^\*\*(.*?)\*\*[：:]([^:\n]+)$', 
-                 r'<div class="info-card"><span class="info-label">\1</span><span class="info-value">\2</span></div>', 
-                 text, flags=re.MULTILINE)
-    
-    # Step 9: 处理链接
-    def process_link(match):
-        text_part = match.group(1)
-        url = match.group(2)
+        text = re.sub(r'```(\w*)\s*(.*?)\s*```', replace_code_block, text, flags=re.DOTALL)
         
-        # 检查是否是有效URL
-        if url.startswith(('http://', 'https://', 'www.')):
-            return f'<a href="{url}" target="_blank" rel="noopener noreferrer" class="enhanced-link"><span class="link-text">{text_part}</span><i class="fas fa-external-link-alt link-icon"></i></a>'
-        else:
-            return f'<span class="non-clickable-link">{text_part}</span>'
-    
-    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', process_link, text)
-    
-    # Step 10: 现在处理换行（确保标题和其他格式已经处理完毕）
-    text = text.replace('\n', '<br>')
-    
-    # Step 11: 恢复代码块
-    for i, (code, language) in enumerate(code_blocks):
-        placeholder = f"CODE_BLOCK_PLACEHOLDER_{i}"
+        # Step 2: 处理行内代码
+        inline_codes = []
+        def replace_inline_code(match):
+            code = match.group(1)
+            code = code.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+            inline_codes.append(code)
+            return f"INLINE_CODE_PLACEHOLDER_{len(inline_codes) - 1}"
         
-        # 简化的代码块，移除语言标签、行数统计和复制按钮
-        code_html = f'''<pre><code class="language-{language}">{code.strip()}</code></pre>'''
-        text = text.replace(placeholder, code_html)
-    
-    # Step 12: 恢复行内代码
-    for i, code in enumerate(inline_codes):
-        placeholder = f"INLINE_CODE_PLACEHOLDER_{i}"
-        text = text.replace(placeholder, f'<code class="enhanced-inline-code">{code}</code>')
-    
-    # Step 13: 清理多余的换行
-    text = re.sub(r'(<br>){3,}', '<br><br>', text)
-    
-    # Step 14: 正确关闭section标签
-    # 为每个answer-section添加正确的结束标签
-    sections = text.split('<div class="answer-section">')
-    if len(sections) > 1:
-        formatted_sections = [sections[0]]  # 第一部分（可能为空）
-        for i, section in enumerate(sections[1:], 1):
-            # 为每个section添加结束标签
-            if i < len(sections) - 1:
-                # 不是最后一个section，在下一个section前结束
-                section_end = '</div></div>'
-            else:
-                # 最后一个section
-                section_end = '</div></div>'
-            
-            formatted_sections.append('<div class="answer-section">' + section + section_end)
+        text = re.sub(r'`([^`\n]+)`', replace_inline_code, text)
         
-        text = ''.join(formatted_sections)
-    
-    # Step 15: 最终包装
-    if text.strip():
-        text = f'<div class="enhanced-response-container">{text}</div>'
-    
-    return text
+        # Step 3: 简化的标题处理（合并多个regex为一个）
+        # 处理所有标题类型
+        text = re.sub(r'^##\s+(.+?)$', 
+                     r'<div class="answer-section"><div class="section-header"><h2 class="section-title">\1</h2><div class="section-line"></div></div><div class="section-content">', 
+                     text, flags=re.MULTILINE)
+        
+        text = re.sub(r'^###\s+(.+?)$', 
+                     r'<div class="subsection-header"><h3 class="subsection-title">\1</h3><div class="subsection-accent"></div></div>', 
+                     text, flags=re.MULTILINE)
+        
+        # Step 4: 简化的格式处理
+        # 粗体和斜体
+        text = re.sub(r'\*\*(.*?)\*\*', r'<strong class="enhanced-bold">\1</strong>', text)
+        text = re.sub(r'\*(.*?)\*', r'<em class="enhanced-italic">\1</em>', text)
+        
+        # Step 5: 简化的列表处理
+        text = re.sub(r'^\s*-\s+(.*?)$', r'<li class="enhanced-bullet-item">\1</li>', text, flags=re.MULTILINE)
+        text = re.sub(r'(<li class="enhanced-bullet-item">.*?</li>\s*)+', 
+                     lambda m: f'<ul class="enhanced-bullet-list">{m.group(0)}</ul>', text, flags=re.DOTALL)
+        
+        # Step 6: 简化的链接处理
+        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', 
+                     r'<a href="\2" target="_blank" rel="noopener noreferrer" class="enhanced-link">\1</a>', text)
+        
+        # Step 7: 处理换行
+        text = text.replace('\n', '<br>')
+        
+        # Step 8: 恢复代码块
+        for i, (code, language) in enumerate(code_blocks):
+            placeholder = f"CODE_BLOCK_PLACEHOLDER_{i}"
+            code_html = f'<pre><code class="language-{language}">{code.strip()}</code></pre>'
+            text = text.replace(placeholder, code_html)
+        
+        # Step 9: 恢复行内代码
+        for i, code in enumerate(inline_codes):
+            placeholder = f"INLINE_CODE_PLACEHOLDER_{i}"
+            text = text.replace(placeholder, f'<code class="enhanced-inline-code">{code}</code>')
+        
+        # Step 10: 清理多余的换行
+        text = re.sub(r'(<br>){3,}', '<br><br>', text)
+        
+        # Step 11: 最终包装
+        if text.strip():
+            text = f'<div class="enhanced-response-container">{text}</div>'
+        
+        return text
+        
+    except Exception as e:
+        # 如果格式化失败，返回简单的HTML包装的原始文本
+        print(f"Format error: {str(e)}")
+        return f'<div class="enhanced-response-container"><p>{text}</p></div>'
 
 # Format the response with the proper HTML structure
 def format_response(text, question_type="DIRECT", original_question="", include_json_code=True):
@@ -690,9 +620,10 @@ User's Original Message:
                 print(traceback.format_exc())
                 # Return the raw response if formatting fails
                 return jsonify({
-                    "response": f"<div class='answer-box'><div class='answer-content'><p>{ai_response}</p></div></div>",
+                    "response": f"<div class='enhanced-response-container'><p>{ai_response}</p></div>",
                     "question_type": question_type,
-                    "user_specific": user_id is not None
+                    "user_specific": user_id is not None,
+                    "conversation_id": conversation_id if user_id else None
                 })
             
         except Exception as e:

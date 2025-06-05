@@ -3177,6 +3177,12 @@
             try {
                 showTypingIndicator();
                 
+                // Add timeout handling for better user experience
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 90000); // 90 seconds timeout on frontend
+                
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
@@ -3187,21 +3193,32 @@
                         conversation_id: currentSessionId || 'default',
                         code_analysis: null,
                         query_classification: null
-                    })
+                    }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
                 const data = await response.json();
                 hideTypingIndicator();
 
                 if (data.response) {
                     addBotMessage(data.response);
+                } else if (data.error) {
+                    addBotMessage(`I encountered an issue: ${data.error}. Please try again or ask your question differently.`);
                 } else {
                     addBotMessage("Sorry, I couldn't process your message. Please try again.");
                 }
             } catch (error) {
                 hideTypingIndicator();
                 console.error('Error sending chat message:', error);
-                addBotMessage("There was an error processing your message. Please try again.");
+                
+                if (error.name === 'AbortError') {
+                    addBotMessage("Your request is taking longer than expected. This might be because you're asking for a detailed explanation. Please try breaking your question into smaller parts or try again.");
+                } else if (error.message.includes('504')) {
+                    addBotMessage("The server is taking longer than expected to process your request. Please try asking a simpler question or try again in a moment.");
+                } else {
+                    addBotMessage("There was an error processing your message. Please try again.");
+                }
             }
         }
 
