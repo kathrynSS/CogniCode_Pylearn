@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python@3.9.5"
     }
   ],
   "routes": [
@@ -16,5 +16,10 @@
     "FLASK_ENV": "production",
     "MAX_FILE_SIZE": "16777216",
     "UPLOAD_FOLDER": "Resources"
+  },
+  "functions": {
+    "app.py": {
+      "maxDuration": 30
+    }
   }
 } 
