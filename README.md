@@ -14,7 +14,8 @@
 > *Note: These videos are simple demos of the initial version. More features and improvements are coming soon!*
 
 **Interactive Knowledge Graph**  
-https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing
+
+https://github.com/user-attachments/assets/95d14092-969a-4d76-80ef-58bbf14656cd
 
 *Explore how the visual knowledge graph works in CogniCode.*
 
