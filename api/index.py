@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, request, jsonify, send_file, make_response
 from openai import OpenAI
 from flask_cors import CORS
@@ -8,13 +9,17 @@ import ast
 import traceback
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
-from ..prompt import PROMPTS, PROJECT_TEMPLATES,  get_step_explanation_prompt, get_adaptive_hint_prompt,  get_reflection_prompt_enhanced
 from werkzeug.utils import secure_filename
 import datetime
 
+# 添加根目录到Python路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# 使用绝对导入
+from prompt import PROMPTS, PROJECT_TEMPLATES,  get_step_explanation_prompt, get_adaptive_hint_prompt,  get_reflection_prompt_enhanced
 
 # 导入Google Drive服务
-from ..google_drive_service import GoogleDriveService
+from google_drive_service import GoogleDriveService
 
 # Vercel部署配置 - 移除静态文件配置，让Vercel处理
 app = Flask(__name__)
@@ -22,8 +27,8 @@ CORS(app, supports_credentials=True)  # Enable CORS for all routes with credenti
 
 # 导入认证相关模块
 try:
-    from ..models_neon import DatabaseManager
-    from ..auth_middleware import init_auth_middleware, require_auth, require_owner, optional_auth, get_current_user, get_current_user_id
+    from models_neon import DatabaseManager
+    from auth_middleware import init_auth_middleware, require_auth, require_owner, optional_auth, get_current_user, get_current_user_id
     
     # 初始化认证中间件
     init_auth_middleware(app)
