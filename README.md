@@ -1,93 +1,162 @@
-# Python Learning Platform
+# 🐍 CogniCode: AI-Powered Python Learning Platform
 
-这是一个基于Flask的Python学习平台，提供交互式学习体验、项目创建、代码分析等功能。
+[![Live Demo](https://img.shields.io/badge/Try%20it%20Now-Online-brightgreen?style=for-the-badge&logo=vercel)](https://capstone-six-alpha.vercel.app/)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel)](https://capstone-six-alpha.vercel.app/)
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.3.2-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-## 功能特性
+> **A next-generation AI-powered platform for learning Python interactively — featuring a visual knowledge graph, an intelligent chatbot tutor, and a built-in online IDE. Level up your programming skills with a personalized and immersive experience.**
 
-- 🤖 AI驱动的学习聊天机器人
-- 📊 交互式学习进度图表
-- 💻 在线IDE和代码执行
-- 📝 个人笔记系统
-- 🔐 用户认证和会话管理
-- 📁 文件上传和管理
-- 🎯 个性化学习项目创建
+---
 
-## 项目结构
+## 🚀 [Live Demo](https://capstone-six-alpha.vercel.app/)
 
-```
-├── app.py                    # 主应用入口文件 (Vercel)
-├── server.py                 # 原始服务器文件 (本地开发)
-├── vercel.json              # Vercel配置文件
-├── requirements.txt         # Python依赖
-├── models.py                # 数据库模型
-├── auth_middleware.py       # 认证中间件
-├── prompt.py                # AI提示词配置
-├── app_database.db          # SQLite数据库
-├── index.html               # 主页
-├── learning_chatbot.html    # 学习聊天机器人页面
-├── graph.html               # 学习进度图表页面
-├── auth.html                # 用户认证页面
-├── styles.css               # 样式文件
-├── script.js                # 主要JavaScript文件
-├── notes_fix_complete.js    # 笔记功能JavaScript
-├── upload_fix.js            # 文件上传JavaScript
-└── Resources/               # 用户上传文件目录
-```
+Try out CogniCode instantly in your browser — no installation required.
 
-## Vercel部署
+## 📺 Demo Videos
+> *Note: These videos are simple demos of the initial version. More features and improvements are coming soon!*
+### 🔹 Interactive Knowledge Graph
 
-### 部署准备
+[![Watch the Knowledge Graph Demo](https://img.shields.io/badge/Watch%20Video-Interactive%20Graph-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing)
+  
+*Explore how the visual knowledge graph works in CogniCode.*
 
-1. 确保所有文件结构正确
-2. 配置环境变量：
-   - `DEEPSEEK_API_KEY`: DeepSeek API密钥（可选，用于AI功能）
+---
 
-### 部署步骤
+### 🔹 AI Chatbot Learning Assistant
 
-1. 将项目推送到GitHub仓库
-2. 在Vercel控制台导入项目
-3. Vercel会自动检测Python项目并使用`vercel.json`配置
-4. 配置环境变量（如果需要AI功能）
-5. 部署完成
+[![Watch the Chatbot Demo](https://img.shields.io/badge/Watch%20Video-Chatbot%20Assistant-green?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1uQW-4hvsNbHJRXz2x8EKiqW)
 
-### 重要配置文件
+---
 
-- `vercel.json`: Vercel部署配置
-- `app.py`: 主应用入口（从server.py复制并适配）
-- `requirements.txt`: Python依赖列表
-- `.vercelignore`: 部署时忽略的文件
+## ✨ Key Features
 
-## 环境变量
+### 🌐 Interactive Knowledge Graph
+- **Visualized Learning Path:** Dynamic, beautiful D3.js graph displays Python concepts and their relationships.
+- **Smart Navigation:** Click on any concept to focus, expand, and see contextually related topics.
+- **Instant Highlights:** Real-time highlighting of relevant nodes and connections as you explore.
+- **Concise Explanations:** Every node comes with a brief, clear explanation.
 
-```
-DEEPSEEK_API_KEY=your-deepseek-api-key-here
-```
+### 🤖 AI Learning Assistant
+- **Multi-turn Conversation:** Maintain learning context in ongoing chat with the AI tutor.
+- **Personalized Learning Modes:** Choose from different teaching styles to fit your needs.
+- **Layered Answers:** Get concise answers first, then dive deeper if you wish.
+- **Intelligent Code Analysis:** Automatic code review and suggestions for improvement.
 
-## 本地开发
+### 🎯 Project-Based Learning
+- **AI Task Breakdown:** The AI decomposes project descriptions into actionable learning steps.
+- **Step-by-Step Guidance:** Each task step comes with detailed instructions and links to related knowledge.
+- **Progress Tracking:** Visualize your learning progress and completion status in real time.
+- **Theory & Practice:** Instantly connect practical tasks to relevant theory in the knowledge graph.
 
-如果要在本地运行：
+### 💻 Online IDE
+- **Write & Run Code:** Edit and execute Python code directly in your browser.
+- **Error Diagnosis:** Get smart error messages and AI-powered fix suggestions.
+- **Line-by-Line Explanation:** Ask the AI for code walkthroughs.
+- **Instant Feedback:** See results and errors immediately.
 
-```bash
-# 安装依赖
-pip install -r requirements.txt
+### 📚 Resource & Note Management
+- **Upload/Download Materials:** Supports multiple formats (PDF, DOC, TXT, etc.).
+- **Open Sharing:** Share resources with the community or keep them private.
+- **Personal Notes:** Take notes, organize them, and sync across devices.
+- **Cloud Sync:** Google Drive integration for seamless backup and access.
 
-# 运行本地服务器
-python server.py
-```
+### 🔐 User System
+- **Secure Authentication:** Register and log in with JWT-based security.
+- **Personal Workspace:** All your learning data and progress in one place.
+- **Privacy Controls:** Full export and privacy options for your data.
 
-访问 http://127.0.0.1:5000
+---
 
-## 注意事项
+## 🏗️ Tech Stack & Project Structure
 
-- 生产环境请使用环境变量存储API密钥
-- SQLite数据库在Vercel上是只读的，考虑迁移到外部数据库
-- 文件上传功能在Vercel上可能受限，考虑使用云存储服务
+### Project Structure
 
-## 技术栈
+```text
+capstone/
+├── app.py                     # Main Flask app entry point
+├── api/                       # Vercel API routes
+│   └── index.py
+├── models_neon.py             # Neon PostgreSQL models
+├── auth_middleware.py         # User authentication middleware
+├── prompt.py                  # AI prompt configuration
+├── google_drive_service.py    # Google Drive integration
+├── templates/                 # Frontend HTML pages
+│   ├── index.html
+│   ├── graph.html
+│   ├── learning_chatbot.html
+│   ├── auth.html
+├── static/
+│   ├── styles.css
+│   ├── script.js
+│   ├── notes_fix_complete.js
+│   └── upload_fix.js
+├── Resources/                 # Uploaded user files
+├── vercel.json                # Vercel deployment config
+├── requirements.txt           # Python dependencies
+└── .vercelignore              # Files to ignore during deployment
 
-- **后端**: Flask, Python
-- **前端**: HTML, CSS, JavaScript
-- **数据库**: SQLite
-- **AI**: DeepSeek API
-- **部署**: Vercel
-- **认证**: 自定义JWT会话管理 
+### Core Stack
+
+- **Backend:** Flask 2.3.2, Neon PostgreSQL, OpenAI SDK, Google Drive API, JWT
+- **Frontend:** D3.js v7, Vanilla JavaScript, CSS Grid/Flexbox, Font Awesome
+- **Deployment:** Vercel (Serverless), Neon (Cloud DB), Google Drive
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- Flask 2.3.2+
+
+### Local Setup
+
+1. **Clone the repository**
+    ```bash
+    git clone git@github.com:kathrynSS/CogniCode.git
+    cd capstone
+    ```
+
+2. **Install dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Set environment variables**
+    ```bash
+    # Create .env file
+    echo "DEEPSEEK_API_KEY=your-deepseek-api-key-here" > .env
+    echo "GOOGLE_DRIVE_CREDENTIALS_PATH=path/to/credentials.json" >> .env
+    ```
+
+4. **Run the app**
+    ```bash
+    python app.py
+    ```
+
+5. **Open in browser**
+    ```
+    http://localhost:5000
+    ```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🙌 Join the Community
+
+- Open to issues, discussions, and pull requests — your feedback and contributions are highly appreciated!
+- **If you find this project helpful, please give us a ⭐ Star — it motivates us to keep improving!**
+
+<div align="center">
+
+[👉 Try CogniCode Online!](https://capstone-six-alpha.vercel.app/)
+
+</div>
