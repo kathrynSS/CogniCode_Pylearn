@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel部署调试工具 - CogniCode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1976d2;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e1f5fe;
+            border-radius: 10px;
+            background: #f8faff;
+        }
+
+        .debug-section h2 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745, #20a144);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .results {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-good { background: #28a745; }
+        .status-warning { background: #ffc107; }
+        .status-error { background: #dc3545; }
+        .status-unknown { background: #6c757d; }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 10px 20px;
+            color: #1976d2;
+            text-decoration: none;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Vercel部署调试工具</h1>
+        
+        <div class="info-box">
+            <h3>📋 使用说明</h3>
+            <p>此工具用于诊断Vercel部署后learning_chatbot.html页面项目下拉栏显示问题。</p>
+            <p>请按顺序点击下面的按钮进行诊断，并查看控制台输出获取详细信息。</p>
+            <p><strong>重要：</strong>打开浏览器控制台（F12）查看详细诊断结果！</p>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔬 完整诊断</h2>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="runFullDiagnostics()">运行完整诊断</button>
+                <button class="btn btn-secondary" onclick="testProjectsAPI()">测试项目API</button>
+                <button class="btn btn-warning" onclick="checkAuthStatus()">检查登录状态</button>
+            </div>
+            <div id="fullResults" class="results">点击上方按钮开始诊断...</div>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html">🏠 返回首页</a>
+            <a href="learning_chatbot.html">🤖 学习助手</a>
+            <a href="auth.html">🔐 登录页面</a>
+        </div>
+    </div>
+
+    <script>
+        function updateResults(content) {
+            const element = document.getElementById('fullResults');
+            element.textContent = content;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function appendResults(content) {
+            const element = document.getElementById('fullResults');
+            element.textContent += content + '\n';
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function checkAuthStatus() {
+            try {
+                updateResults('🔐 检查认证状态...\n');
+                
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+
+                const output = `认证状态检查:
+已认证: ${data.authenticated}
+用户信息: ${data.user ? JSON.stringify(data.user, null, 2) : '无'}
+响应状态: ${response.status}`;
+
+                appendResults(output);
+                console.log('🔐 认证状态检查完成:', data);
+                return data;
+            } catch (error) {
+                appendResults(`认证检查错误: ${error.message}`);
+                console.error('🔐 认证检查失败:', error);
+                return null;
+            }
+        }
+
+        async function testProjectsAPI() {
+            try {
+                appendResults('\n📊 测试项目API...\n');
+                
+                const response = await fetch('/api/projects');
+                const data = await response.json();
+                
+                const output = `项目API测试结果:
+响应状态: ${response.status}
+成功: ${data.success}
+项目数量: ${data.projects ? Object.keys(data.projects).length : 0}
+调试信息: ${data.debug ? JSON.stringify(data.debug, null, 2) : '无'}
+错误信息: ${data.error || '无'}`;
+
+                appendResults(output);
+                console.log('📊 项目API测试完成:', data);
+                
+                if (data.projects) {
+                    const templateCount = Object.values(data.projects).filter(p => p.type === 'template').length;
+                    const userCount = Object.values(data.projects).filter(p => p.type === 'user_created').length;
+                    appendResults(`模板项目: ${templateCount} 个`);
+                    appendResults(`用户项目: ${userCount} 个`);
+                }
+                
+                return data;
+            } catch (error) {
+                appendResults(`项目API错误: ${error.message}`);
+                console.error('📊 项目API测试失败:', error);
+                return null;
+            }
+        }
+
+        async function runFullDiagnostics() {
+            updateResults('🔬 开始完整诊断...\n');
+            
+            // 环境信息
+            appendResults(`环境信息:
+URL: ${window.location.href}
+主机: ${window.location.host}
+协议: ${window.location.protocol}
+浏览器: ${navigator.userAgent.split(') ')[0]})
+时间: ${new Date().toISOString()}\n`);
+            
+            // 认证检查
+            const authData = await checkAuthStatus();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // API测试
+            const apiData = await testProjectsAPI();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // 数据库测试
+            try {
+                appendResults('\n🗄️ 测试数据库连接...');
+                const dbResponse = await fetch('/api/user/statistics');
+                appendResults(`数据库连接: ${dbResponse.ok ? '正常' : '失败'} (状态: ${dbResponse.status})`);
+            } catch (error) {
+                appendResults(`数据库连接错误: ${error.message}`);
+            }
+            
+            // 总结
+            appendResults('\n📋 诊断总结:');
+            appendResults(`✓ 用户认证: ${authData?.authenticated ? '已登录' : '未登录'}`);
+            appendResults(`✓ 项目API: ${apiData?.success ? '正常' : '异常'}`);
+            
+            if (apiData?.debug) {
+                appendResults(`✓ 数据库状态: ${apiData.debug.database_available ? '可用' : '不可用'}`);
+                if (apiData.debug.errors && apiData.debug.errors.length > 0) {
+                    appendResults(`⚠️ 发现错误: ${apiData.debug.errors.join(', ')}`);
+                }
+            }
+            
+            appendResults('\n💡 如果用户项目不显示，可能的原因:');
+            appendResults('1. 用户未登录');
+            appendResults('2. 数据库连接问题');
+            appendResults('3. Vercel环境变量配置问题');
+            appendResults('\n请查看控制台获取更详细的信息！');
+            
+            console.log('🔬 完整诊断完成');
+        }
+
+        // 页面加载时显示提示
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Vercel调试工具已加载');
+            console.log('💡 请点击"运行完整诊断"按钮开始诊断');
+        });
+    </script>
+</body>
+</html> 

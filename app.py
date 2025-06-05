@@ -440,6 +440,11 @@ def online_ide():
     """Serve the online IDE page"""
     return send_file('online_ide.html')
 
+@app.route('/vercel_debug')
+def vercel_debug():
+    """Serve the Vercel debug page"""
+    return send_file('vercel_debug.html')
+
 # 静态文件服务路由
 @app.route('/styles.css')
 def serve_css():
@@ -1071,46 +1076,85 @@ def get_projects():
     """Get available project templates and user projects"""
     try:
         projects = {}
+        debug_info = {
+            'database_available': DATABASE_AVAILABLE,
+            'user_authenticated': False,
+            'template_count': 0,
+            'user_projects_count': 0,
+            'memory_projects_count': 0,
+            'errors': []
+        }
         
         # Add template projects (available to all users)
-        for key, value in PROJECT_TEMPLATES.items():
-            projects[key] = {
-                'name': value['name'],
-                'description': value['description'],
-                'total_steps': len(value['steps']),
-                'type': 'template'
-            }
-        
-        # Add user-created projects (only for authenticated users)
-        current_user = get_current_user()
-        if current_user:
-            user_id = current_user['id']
-            user_projects = db_manager.get_user_projects(user_id)
-            
-            for project_id, project_info in user_projects.items():
-                project_data = project_info['data']
-                projects[project_id] = {
-                    'name': project_data['name'],
-                    'description': project_data['description'],
-                    'total_steps': len(project_data['steps']),
-                    'type': 'user_created',
-                    'created_at': project_info['created_at'],
-                    'updated_at': project_info['updated_at']
-                }
-        
-        # 添加旧的内存中的项目（兼容性）
-        for key, value in USER_CREATED_PROJECTS.items():
-            if key not in projects:  # 避免重复
+        try:
+            for key, value in PROJECT_TEMPLATES.items():
                 projects[key] = {
                     'name': value['name'],
                     'description': value['description'],
                     'total_steps': len(value['steps']),
-                    'type': 'user_created'
+                    'type': 'template'
                 }
+            debug_info['template_count'] = len(PROJECT_TEMPLATES)
+        except Exception as e:
+            debug_info['errors'].append(f'Template projects error: {str(e)}')
+        
+        # Add user-created projects (only for authenticated users)
+        current_user = get_current_user()
+        if current_user:
+            debug_info['user_authenticated'] = True
+            user_id = current_user['id']
             
-        return jsonify({'success': True, 'projects': projects})
+            # Try to get user projects from database
+            if DATABASE_AVAILABLE and db_manager:
+                try:
+                    user_projects = db_manager.get_user_projects(user_id)
+                    
+                    for project_id, project_info in user_projects.items():
+                        project_data = project_info['data']
+                        projects[project_id] = {
+                            'name': project_data['name'],
+                            'description': project_data['description'],
+                            'total_steps': len(project_data['steps']),
+                            'type': 'user_created',
+                            'created_at': project_info['created_at'],
+                            'updated_at': project_info['updated_at']
+                        }
+                    debug_info['user_projects_count'] = len(user_projects)
+                except Exception as e:
+                    debug_info['errors'].append(f'Database user projects error: {str(e)}')
+            else:
+                debug_info['errors'].append('Database not available for user projects')
+        
+        # 添加旧的内存中的项目（兼容性）
+        try:
+            for key, value in USER_CREATED_PROJECTS.items():
+                if key not in projects:  # 避免重复
+                    projects[key] = {
+                        'name': value['name'],
+                        'description': value['description'],
+                        'total_steps': len(value['steps']),
+                        'type': 'user_created'
+                    }
+            debug_info['memory_projects_count'] = len(USER_CREATED_PROJECTS)
+        except Exception as e:
+            debug_info['errors'].append(f'Memory projects error: {str(e)}')
+        
+        response_data = {
+            'success': True, 
+            'projects': projects,
+            'debug': debug_info if app.debug else None  # Only include debug info in development
+        }
+        
+        return jsonify(response_data)
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'debug': {
+                'database_available': DATABASE_AVAILABLE,
+                'error_type': type(e).__name__
+            } if app.debug else None
+        })
 
 def create_fallback_project_steps(project_name, project_description):
     """Create fallback project steps when AI is not available"""

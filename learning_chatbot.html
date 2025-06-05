@@ -2741,8 +2741,17 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            loadProjects();
-            setupEventListeners();
+            // Add delay for Vercel cold start
+            setTimeout(() => {
+                loadProjects();
+                setupEventListeners();
+            }, 1000);
+            
+            // Show loading indicator
+            const select = document.getElementById('projectSelect');
+            if (select) {
+                select.innerHTML = '<option value="">🔄 正在加载项目...</option>';
+            }
         });
 
         // Setup event listeners
@@ -2798,12 +2807,43 @@
         // Load available projects
         async function loadProjects() {
             try {
+                console.log('🔄 正在加载项目列表...');
                 const response = await fetch('/api/projects');
+                
+                console.log('📡 API响应状态:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('📊 API响应数据:', data);
                 
                 if (data.success) {
                     const select = document.getElementById('projectSelect');
                     select.innerHTML = '<option value="">Select a Project...</option>';
+                    
+                    // Log debug information if available
+                    if (data.debug) {
+                        console.log('🐛 调试信息:', data.debug);
+                        if (data.debug.errors && data.debug.errors.length > 0) {
+                            console.warn('⚠️ 加载项目时发现错误:', data.debug.errors);
+                        }
+                    }
+                    
+                    // Check if we have any projects
+                    const projectCount = Object.keys(data.projects || {}).length;
+                    console.log(`📁 找到 ${projectCount} 个项目`);
+                    
+                    if (projectCount === 0) {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '❌ 没有找到任何项目';
+                        option.disabled = true;
+                        select.appendChild(option);
+                        console.warn('⚠️ 没有找到任何项目');
+                        return;
+                    }
                     
                     // Separate template and user-created projects
                     const templateProjects = {};
@@ -2816,6 +2856,9 @@
                             userProjects[id] = project;
                         }
                     });
+                    
+                    console.log(`📚 模板项目: ${Object.keys(templateProjects).length} 个`);
+                    console.log(`👤 用户项目: ${Object.keys(userProjects).length} 个`);
                     
                     // Add template projects
                     if (Object.keys(templateProjects).length > 0) {
@@ -2842,9 +2885,32 @@
                         });
                         select.appendChild(userGroup);
                     }
+                    
+                    console.log('✅ 项目列表加载完成');
+                } else {
+                    console.error('❌ API返回失败:', data.error);
+                    const select = document.getElementById('projectSelect');
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '❌ 加载项目失败: ' + (data.error || '未知错误');
+                    option.disabled = true;
+                    select.appendChild(option);
                 }
             } catch (error) {
-                console.error('Error loading projects:', error);
+                console.error('❌ 加载项目时发生错误:', error);
+                
+                // Show error in dropdown
+                const select = document.getElementById('projectSelect');
+                if (select) {
+                    select.innerHTML = '<option value="">❌ 网络错误，无法加载项目</option>';
+                }
+                
+                // Try to show detailed error information
+                console.group('🔍 错误详情');
+                console.error('错误类型:', error.name);
+                console.error('错误信息:', error.message);
+                console.error('错误堆栈:', error.stack);
+                console.groupEnd();
             }
         }
 
