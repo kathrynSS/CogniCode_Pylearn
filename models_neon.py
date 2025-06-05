@@ -432,10 +432,23 @@ class DatabaseManager:
                 WHERE user_id = %s 
                 ORDER BY updated_at DESC
             '''
-            return self._execute_query(query, (user_id,), fetch_all=True)
+            rows = self._execute_query(query, (user_id,), fetch_all=True)
+            
+            # Convert list of rows to dictionary format expected by the application
+            projects = {}
+            if rows:
+                for row in rows:
+                    project_id = row['project_id']
+                    projects[project_id] = {
+                        'data': row['project_data'],  # This should already be parsed JSON
+                        'created_at': row['created_at'].isoformat() if row['created_at'] else '',
+                        'updated_at': row['updated_at'].isoformat() if row['updated_at'] else ''
+                    }
+            
+            return projects
         except Exception as e:
             logger.error(f"获取用户项目失败: {e}")
-            return []
+            return {}
 
     def delete_user_project(self, user_id, project_id):
         """删除用户项目"""

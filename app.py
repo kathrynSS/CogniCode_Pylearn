@@ -1109,19 +1109,25 @@ def get_projects():
                 try:
                     user_projects = db_manager.get_user_projects(user_id)
                     
+                    # Process user projects (now returns dict format)
                     for project_id, project_info in user_projects.items():
-                        project_data = project_info['data']
-                        projects[project_id] = {
-                            'name': project_data['name'],
-                            'description': project_data['description'],
-                            'total_steps': len(project_data['steps']),
-                            'type': 'user_created',
-                            'created_at': project_info['created_at'],
-                            'updated_at': project_info['updated_at']
-                        }
+                        if isinstance(project_info, dict) and 'data' in project_info:
+                            project_data = project_info['data']
+                            projects[project_id] = {
+                                'name': project_data['name'],
+                                'description': project_data['description'],
+                                'total_steps': len(project_data['steps']),
+                                'type': 'user_created',
+                                'created_at': project_info.get('created_at', ''),
+                                'updated_at': project_info.get('updated_at', '')
+                            }
                     debug_info['user_projects_count'] = len(user_projects)
+                    
                 except Exception as e:
                     debug_info['errors'].append(f'Database user projects error: {str(e)}')
+                    print(f"🔍 Debug - get_user_projects error: {str(e)}")
+                    import traceback
+                    print(f"🔍 Debug - traceback: {traceback.format_exc()}")
             else:
                 debug_info['errors'].append('Database not available for user projects')
         
