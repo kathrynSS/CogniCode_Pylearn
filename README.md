@@ -15,7 +15,7 @@
 Try out CogniCode instantly in your browser — no installation required.
 
 ## 📺 Demo Videos
-> *Note: These videos are simple demos of the initial version. More features and improvements are coming soon!*
+
 ### 🔹 Interactive Knowledge Graph
 
 [![Watch the Knowledge Graph Demo](https://img.shields.io/badge/Watch%20Video-Interactive%20Graph-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing)
@@ -96,6 +96,8 @@ capstone/
 ├── vercel.json                # Vercel deployment config
 ├── requirements.txt           # Python dependencies
 └── .vercelignore              # Files to ignore during deployment
+</div>
+
 
 ### Core Stack
 
@@ -159,4 +161,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 [👉 Try CogniCode Online!](https://capstone-six-alpha.vercel.app/)
 
-</div>
+
