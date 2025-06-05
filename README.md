@@ -15,11 +15,13 @@
 > *Note: These videos are simple demos of the initial version. More features and improvements are coming soon!*
 
 **Interactive Knowledge Graph**  
-[![Watch the Knowledge Graph Demo](https://img.shields.io/badge/Watch%20Video-Interactive%20Graph-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing)  
+https://img.shields.io/badge/Watch%20Video-Interactive%20Graph-blue?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1l8lButc8GJyCbne9X8xSi9-2c6WdTJhx/view?usp=sharing
+
 *Explore how the visual knowledge graph works in CogniCode.*
 
 **AI Chatbot Learning Assistant**  
-[![Watch the Chatbot Demo](https://img.shields.io/badge/Watch%20Video-Chatbot%20Assistant-green?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1uQW-4hvsNbHJRXz2x8EKiqW2GXY-g2Ys/view?usp=sharing)  
+https://img.shields.io/badge/Watch%20Video-Chatbot%20Assistant-green?style=for-the-badge&logo=google-drive)](https://drive.google.com/file/d/1uQW-4hvsNbHJRXz2x8EKiqW2GXY-g2Ys/view?usp=sharing
+
 *See the AI-powered chatbot in action, guiding learners step by step.*
 
 ---
