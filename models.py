@@ -5,37 +5,45 @@ from datetime import datetime, timedelta
 import json
 
 # 根据环境选择数据库驱动
+# Always import both drivers if available
+sqlite3 = None
+psycopg2 = None
+
 try:
-    # 优先使用 psycopg2 for PostgreSQL (Vercel)
+    import sqlite3
+    print("✅ SQLite3 available")
+except ImportError:
+    print("❌ SQLite3 not available")
+
+try:
     import psycopg2
     import psycopg2.extras
     from psycopg2 import sql
-    DB_TYPE = 'postgresql'
-    print("✅ Using PostgreSQL (Vercel Postgres)")
+    print("✅ PostgreSQL (psycopg2) available")
 except ImportError:
-    try:
-        # 回退到 sqlite3 for local development
-        import sqlite3
-        DB_TYPE = 'sqlite'
-        print("⚠️  Using SQLite (local development)")
-    except ImportError:
-        raise ImportError("Neither psycopg2 nor sqlite3 is available")
+    print("❌ PostgreSQL (psycopg2) not available")
+
+# Check if we have at least one database driver
+if not sqlite3 and not psycopg2:
+    raise ImportError("Neither psycopg2 nor sqlite3 is available")
+
+# Default to PostgreSQL if available, but will be determined at runtime
+DB_TYPE = 'postgresql' if psycopg2 else 'sqlite'
 
 class DatabaseManager:
     def __init__(self, db_path='app_database.db'):
-        self.db_type = DB_TYPE
+        # Determine database type based on environment and availability
+        self.db_url = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL')
         
-        if self.db_type == 'postgresql':
-            # Vercel Postgres connection
-            self.db_url = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL')
-            if not self.db_url:
-                print("❌ No POSTGRES_URL found, falling back to SQLite")
-                self.db_type = 'sqlite'
-                self.db_path = db_path
-            else:
-                print(f"🔗 Connecting to PostgreSQL: {self.db_url[:50]}...")
-        else:
+        if self.db_url and psycopg2:
+            self.db_type = 'postgresql'
+            print(f"✅ Using PostgreSQL: {self.db_url[:50]}...")
+        elif sqlite3:
+            self.db_type = 'sqlite'
             self.db_path = db_path
+            print("✅ Using SQLite for local development")
+        else:
+            raise RuntimeError("No database driver available")
             
         self.init_database()
     

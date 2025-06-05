@@ -676,10 +676,7 @@ def detailed_chat():
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
-# Add routes to serve static files
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_file(path)
+# Note: serve_static route is already defined above with security checks
 
 # Problem identification function to analyze code and categorize issues
 def identify_problem(code, error_message=None):
@@ -3154,11 +3151,17 @@ def validate_and_suggest_code_fixes(code):
     return issues, suggestions
 
 # Vercel需要的app变量导出
-# 移除本地运行的代码，因为Vercel不需要
-# if __name__ == '__main__': 部分已被移除
-
 # 确保应用可以被Vercel导入
 application = app
+
+# 本地开发运行
+if __name__ == '__main__':
+    print("🚀 Starting Flask application...")
+    print("✅ Database initialized with SQLite")
+    print("🌐 Server will be available at: http://127.0.0.1:5000")
+    print("📝 Registration URL: http://127.0.0.1:5000/auth.html")
+    print("=" * 50)
+    app.run(debug=True, host='127.0.0.1', port=5000)
 
 @app.route('/api/rename/<int:file_id>', methods=['PUT'])
 @require_auth
@@ -3216,3 +3219,6 @@ def rename_file(file_id):
         error_msg = f'Rename failed: {str(e)}'
         print(f"Rename error: {error_msg}")
         return jsonify({'success': False, 'error': error_msg}), 500
+    
+
+    
