@@ -64,7 +64,28 @@ drive_service = None
 try:
     # 尝试从环境变量获取Google Drive凭据
     credentials_json = os.getenv('GOOGLE_DRIVE_CREDENTIALS')
-    credentials_path = os.getenv('GOOGLE_DRIVE_CREDENTIALS_PATH', '../rock-objective-453508-q3-3cf65595ee72.json')
+    # 尝试多个可能的路径
+    default_paths = [
+        'rock-objective-453508-q3-3cf65595ee72.json',  # 当前目录
+        '../rock-objective-453508-q3-3cf65595ee72.json',  # 上级目录
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), 'rock-objective-453508-q3-3cf65595ee72.json')  # 根目录
+    ]
+    
+    credentials_path = os.getenv('GOOGLE_DRIVE_CREDENTIALS_PATH')
+    if not credentials_path:
+        # 找到第一个存在的文件
+        print("🔍 Searching for Google Drive credentials file...")
+        for path in default_paths:
+            print(f"   Checking: {path}")
+            if os.path.exists(path):
+                credentials_path = path
+                print(f"   ✅ Found: {path}")
+                break
+            else:
+                print(f"   ❌ Not found: {path}")
+        
+        if not credentials_path:
+            print("   🔍 No credentials file found in any default location")
     
     # 指定的Google Drive文件夹ID
     RESOURCES_FOLDER_ID = "1UbGiexxrOamAhGe8zQU-m4Kqyk9j99-2"
@@ -96,16 +117,28 @@ except Exception as e:
     drive_service = None
 
 # Configure file upload settings  
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'Resources')
+UPLOAD_FOLDER = '/tmp/Resources'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt'}
 MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB max file size
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
-# Ensure upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Only create upload folder if Google Drive is not available and we're not in a serverless environment
+# In serverless environments, the filesystem is usually read-only
+try:
+    if not drive_service:
+        # Only try to create local folder if Google Drive is not available
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        print(f"📁 Local upload folder created: {UPLOAD_FOLDER}")
+    else:
+        print("☁️  Using Google Drive for file storage - local folder not needed")
+except OSError as e:
+    if drive_service:
+        print("ℹ️  Could not create local upload folder, but Google Drive is available - no problem!")
+    else:
+        print(f"⚠️  Could not create local upload folder and Google Drive is not available: {e}")
+        print("💡 Please configure Google Drive credentials for file uploads to work")
 
 
 # Storage for user-created projects (in production, use a database)
@@ -428,55 +461,83 @@ def index():
 @app.route('/learning_chatbot')
 def learning_chatbot():
     """Serve the learning chatbot interface"""
-    return send_file('../learning_chatbot.html')
+    try:
+        # 使用绝对路径确保文件能被找到
+        file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'learning_chatbot.html')
+        return send_file(file_path)
+    except FileNotFoundError:
+        return "Learning chatbot page not found", 404
 
 @app.route('/graph')
 def graph():
     """Serve the graph interface"""
-    return send_file('../graph.html')
+    try:
+        # 使用绝对路径确保文件能被找到
+        file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'graph.html')
+        return send_file(file_path)
+    except FileNotFoundError:
+        return "Graph page not found", 404
 
 @app.route('/auth')
 def auth():
     """Serve the auth interface"""
-    return send_file('../auth.html')
+    try:
+        # 使用绝对路径确保文件能被找到
+        file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'auth.html')
+        return send_file(file_path)
+    except FileNotFoundError:
+        return "Auth page not found", 404
 
 @app.route('/online_ide')
 def online_ide():
     """Serve the online IDE page"""
-    return send_file('../online_ide.html')
+    try:
+        # 使用绝对路径确保文件能被找到
+        file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'online_ide.html')
+        return send_file(file_path)
+    except FileNotFoundError:
+        return "Online IDE page not found", 404
 
 # 静态文件服务路由
 @app.route('/styles.css')
 def serve_css():
-    return send_file('../styles.css', mimetype='text/css')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles.css')
+    return send_file(file_path, mimetype='text/css')
 
 @app.route('/script.js')
 def serve_js():
-    return send_file('../script.js', mimetype='application/javascript')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'script.js')
+    return send_file(file_path, mimetype='application/javascript')
 
 @app.route('/notes_fix_complete.js')
 def serve_notes_js():
-    return send_file('../notes_fix_complete.js', mimetype='application/javascript')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'notes_fix_complete.js')
+    return send_file(file_path, mimetype='application/javascript')
 
 @app.route('/notes_fix.js')
 def serve_notes_fix_js():
-    return send_file('../notes_fix.js', mimetype='application/javascript')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'notes_fix.js')
+    return send_file(file_path, mimetype='application/javascript')
 
 @app.route('/upload_fix.js')
 def serve_upload_js():
-    return send_file('../upload_fix.js', mimetype='application/javascript')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'upload_fix.js')
+    return send_file(file_path, mimetype='application/javascript')
 
 @app.route('/debug_upload.js')
 def serve_debug_upload_js():
-    return send_file('../debug_upload.js', mimetype='application/javascript')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'debug_upload.js')
+    return send_file(file_path, mimetype='application/javascript')
 
 @app.route('/favicon.ico')
 def serve_favicon():
-    return send_file('../favicon.ico')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'favicon.ico')
+    return send_file(file_path)
 
 @app.route('/favicon.svg')
 def serve_favicon_svg():
-    return send_file('../favicon.svg')
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'favicon.svg')
+    return send_file(file_path)
 
 # 通用静态文件服务（作为备用）
 @app.route('/<path:path>')
@@ -485,10 +546,12 @@ def serve_static(path):
     if '..' in path or path.startswith('/'):
         return "File not found", 404
     
-    # 尝试从上级目录查找文件
-    full_path = os.path.join('..', path)
-    # 检查文件是否存在
-    if os.path.exists(full_path):
+    # 使用绝对路径
+    root_dir = os.path.dirname(os.path.dirname(__file__))
+    full_path = os.path.join(root_dir, path)
+    
+    # 检查文件是否存在且在允许的目录内
+    if os.path.exists(full_path) and os.path.commonpath([full_path, root_dir]) == root_dir:
         return send_file(full_path)
     else:
         return "File not found", 404
@@ -1414,21 +1477,32 @@ def upload_file():
             
             else:
                 # 回退到本地存储
-                # Generate unique filename with timestamp and user ID
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                name, ext = os.path.splitext(secure_original_filename)
-                unique_filename = f"user_{user_id}_{name}_{timestamp}{ext}"
-                
-                # Create user-specific upload directory
-                user_upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], f'user_{user_id}')
-                if not os.path.exists(user_upload_dir):
-                    os.makedirs(user_upload_dir)
-                
-                # Save file
-                file_path = os.path.join(user_upload_dir, unique_filename)
-                print(f"Saving file to local storage: {file_path}")
-                
-                file.save(file_path)
+                try:
+                    # Generate unique filename with timestamp and user ID
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    name, ext = os.path.splitext(secure_original_filename)
+                    unique_filename = f"user_{user_id}_{name}_{timestamp}{ext}"
+                    
+                    # Create user-specific upload directory
+                    user_upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], f'user_{user_id}')
+                    if not os.path.exists(user_upload_dir):
+                        os.makedirs(user_upload_dir)
+                    
+                    # Save file
+                    file_path = os.path.join(user_upload_dir, unique_filename)
+                    print(f"Saving file to local storage: {file_path}")
+                    
+                    file.save(file_path)
+                    
+                except OSError as e:
+                    # 在serverless环境中，文件系统可能是只读的
+                    if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                        return jsonify({
+                            'success': False, 
+                            'error': 'File upload requires Google Drive configuration in serverless environment. Please configure Google Drive credentials.'
+                        }), 500
+                    else:
+                        raise e
                 
                 # Get file info
                 file_size = os.path.getsize(file_path)
