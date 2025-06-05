@@ -1,0 +1,1705 @@
+:root {
+  --primary-bg: #f5f7fb;
+  --main-content-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --graph-bg: rgba(245, 247, 251, 0.6);  /* Light gray with transparency */
+  --primary-text: #333;
+  --secondary-text: #666;
+  --accent-color: #6e56cf;
+  --border-color: #eaeaea;
+  --selector-bg: #f8f9fa;
+  --concept-color: #6e56cf;
+  --datatype-color: #4caf50;
+  --structure-color: #ff9800;
+  --header-bg: linear-gradient(135deg, #4b6cb7, #182848);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --primary-color: #667eea;
+  --primary-dark: #5a67d8;
+  --primary-light: #7c8df0;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success-color: #48bb78;
+  --warning-color: #ed8936;
+  --error-color: #f56565;
+  --info-color: #4299e1;
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-light: #a0aec0;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7fafc;
+  --bg-tertiary: #edf2f7;
+  --bg-accent: #f0f4ff;
+  --border-light: #f1f5f9;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-container {
+  height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--primary-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+/* Main content styles */
+.main-content {
+  background-color: var(--main-content-bg);
+  border-radius: 12px;
+  overflow: auto;
+  height: 100%;
+}
+
+header {
+  background: var(--header-bg);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+  color: white;
+  margin: 0;
+  box-shadow: 0 4px 20px rgba(24, 40, 72, 0.25);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.graph-selector {
+  display: flex;
+  align-items: center;
+}
+
+.graph-selector select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--selector-bg);
+  font-size: 14px;
+}
+
+.content {
+  padding: 30px;
+}
+
+.subtitle {
+  color: var(--secondary-text);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+/* Graph styles */
+.graph-container {
+  width: 100%;
+  height: 85vh; /* Increased from 70vh to give more space to the graph */
+  background-color: #ffffff;
+  overflow: hidden;
+  position: relative;
+}
+
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 15px;
+}
+
+.graph-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.graph-header p {
+  font-size: 14px;
+  color: var(--secondary-text);
+}
+
+.graph-visualization {
+  height: 500px;
+  background-color: var(--graph-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-text);
+}
+
+/* Legend styles */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.color-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+.color-box.concept {
+  background-color: var(--concept-color);
+}
+
+.color-box.datatype {
+  background-color: var(--datatype-color);
+}
+
+.color-box.structure {
+  background-color: var(--structure-color);
+}
+
+.legend-label {
+  font-size: 14px;
+  color: var(--secondary-text);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .graph-visualization {
+    height: 400px;
+  }
+  
+  .legend {
+    flex-wrap: wrap;
+  }
+}
+
+/* Chatbot styles */
+/* Removed .chatbot-container and .chatbot-container.active styles as we are using .chat-dialog only */
+
+/* Additional styles to make debugging easier */
+.chat-bot-icon {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  width: 60px !important;
+  height: 60px !important;
+  background: linear-gradient(135deg, #6c63ff, #4834d4) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3) !important;
+  z-index: 1002 !important; /* Higher than chat dialog */
+}
+
+.chat-bot-icon i {
+  font-size: 28px !important;
+  color: white !important;
+}
+
+.chat-dialog {
+  position: fixed !important;
+  top: 40px !important;
+  right: 30px !important;
+  width: 320px !important;
+  background-color: white !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+  z-index: 1001 !important;
+  overflow: hidden !important;
+}
+
+.chat-dialog.active {
+  display: block !important;
+}
+
+.data-section {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background-color: #f5f5f5;
+  display: flex;
+  padding: 15px 15px 0 15px;
+  box-sizing: border-box;
+  gap: 20px;
+  z-index: 10;
+  transition: height 0.3s ease;
+  height: 15vh; /* Reduced from 30vh */
+  box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+}
+
+.data-box {
+  flex: 1;
+  background-color: var(--panel-bg);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  padding: 15px;
+  overflow-y: auto;
+  height: calc(100% - 15px); /* Adjust for padding */
+  min-height: 200px; /* Reduced minimum height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* OLD STYLES - COMMENTED OUT TO AVOID CONFLICTS
+.pull-up-panel {
+  background-color: var(--panel-bg);
+  border-radius: 12px 12px 0 0;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.panel-handle {
+  background-color: var(--primary-bg);
+  padding: 12px 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+*/
+
+.node-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  z-index: 1010;
+  display: none;
+}
+
+/* Question Type Badges and Styling */
+.question-type-badge {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.question-type-direct .question-type-badge {
+  background-color: #3498db;
+  color: white;
+}
+
+.question-type-detailed .question-type-badge {
+  background-color: #9b59b6;
+  color: white;
+}
+
+.question-type-direct .answer-box {
+  border-left: 4px solid #3498db;
+}
+
+.question-type-detailed .answer-box {
+  border-left: 4px solid #9b59b6;
+}
+
+.question-type-detailed .answer-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Typing Animation */
+.typing-animation {
+  display: flex;
+  align-items: center;
+  column-gap: 6px;
+  margin: 10px 0;
+}
+
+.typing-animation span {
+  height: 8px;
+  width: 8px;
+  display: block;
+  border-radius: 50%;
+  background: #3a506b;
+  animation: typing 1.5s ease-in-out infinite;
+}
+
+.typing-animation span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-animation span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.typing-animation span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes typing {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Get Detailed Answer Button */
+.get-detailed-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 15px;
+  background: linear-gradient(135deg, #6c63ff, #4a37ed);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(108, 99, 255, 0.2);
+  transition: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.get-detailed-btn:disabled {
+  background: #a8a5d3;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.get-detailed-btn i {
+  font-size: 16px;
+}
+
+/* Make sure the button is visible against any background */
+.message.bot .get-detailed-btn {
+  margin-left: auto;
+  margin-right: 15px;
+}
+
+/* Step-by-Step formatting */
+.step-heading {
+  font-size: 18px;
+  color: #444;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+  padding-bottom: 8px;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+.step-detail h3 {
+  font-size: 18px;
+  color: #4a37ed;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border-left: 4px solid #4a37ed;
+}
+
+.step-detail p {
+  margin-bottom: 15px;
+  line-height: 1.7;
+}
+
+.step-detail strong {
+  color: #4a37ed;
+  font-weight: 600;
+}
+
+/* Style for the user's question */
+.step-question {
+  font-weight: 500;
+  margin-bottom: 25px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  border-left: 4px solid #6c63ff;
+  font-size: 16px;
+  color: #4a4580;
+  line-height: 1.5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.step-question::before {
+  content: "Your Question:";
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #6c63ff;
+  font-size: 14px;
+}
+
+.step-detail {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #333;
+  padding: 5px;
+}
+
+.answer-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #6c63ff, #4a37ed);
+  padding: 12px 15px;
+  border-radius: 8px 8px 0 0;
+}
+
+.answer-content {
+  padding: 20px;
+  background-color: white;
+  border-radius: 0 0 8px 8px;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+
+.answer-box {
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.answer-box:hover {
+  box-shadow: 0 12px 30px rgba(108, 99, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.answer-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #6c63ff, #4a37ed);
+  padding: 16px 20px;
+  border-radius: 12px 12px 0 0;
+}
+
+.answer-content {
+  padding: 30px;
+  background-color: white;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid #eaeaea;
+  border-top: none;
+}
+
+/* Code block formatting */
+.code-snippet {
+  background-color: #f5f7fb;
+  border-radius: 6px;
+  padding: 15px;
+  margin: 15px 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: auto;
+  border-left: 3px solid #6c63ff;
+  color: #333;
+  white-space: pre;
+}
+
+.code-language {
+  background-color: #4a37ed;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+/* Markdown elements for detailed view */
+.step-detail h1 {
+  font-size: 24px;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+.step-detail h2 {
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #3a506b;
+}
+
+.step-detail ul, .step-detail ol {
+  margin: 10px 0 15px 25px;
+}
+
+.step-detail li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.step-detail a {
+  color: #4a37ed;
+  text-decoration: none;
+  border-bottom: 1px dotted #4a37ed;
+  transition: all 0.2s ease;
+}
+
+.step-detail a:hover {
+  color: #6c63ff;
+  border-bottom: 1px solid #6c63ff;
+}
+
+.step-detail em {
+  font-style: italic;
+  color: #3a506b;
+}
+
+.step-detail strong {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* For code within paragraphs */
+.step-detail code {
+  background-color: #f5f7fb;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 90%;
+  color: #e83e8c;
+}
+
+/* Example boxes */
+.example {
+  background-color: rgba(108, 99, 255, 0.05);
+  border-left: 3px solid #6c63ff;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 6px;
+}
+
+.example h4 {
+  color: #4a37ed;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Make detailed view scrollable if too long */
+.question-type-detailed .step-detail {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Scrollbar styling for webkit browsers */
+.step-detail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.step-detail::-webkit-scrollbar-track {
+  background: #f5f7fb;
+  border-radius: 4px;
+}
+
+.step-detail::-webkit-scrollbar-thumb {
+  background: rgba(108, 99, 255, 0.3);
+  border-radius: 4px;
+}
+
+.step-detail::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 99, 255, 0.5);
+}
+
+.purpose-section {
+  padding: 16px 20px;
+  border-left: 4px solid #6c63ff;
+  margin: 18px 0;
+  border-radius: 0 10px 10px 0;
+  line-height: 1.7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  font-size: 16px;
+  display: block;
+  clear: both;
+}
+
+.knowledge-section {
+  padding: 16px 20px;
+  border-left: 4px solid #2ecc71;
+  margin: 18px 0;
+  border-radius: 0 10px 10px 0;
+  line-height: 1.7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  font-size: 16px;
+  display: block;
+  clear: both;
+}
+
+.step-detail br {
+  margin-bottom: 12px;
+  content: "";
+  display: block;
+}
+
+/* Add new styles for better step formatting */
+.step-detail p {
+  margin-bottom: 18px;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* Add visual separation between steps */
+.step-detail h3 + p, .step-heading + p {
+  margin-top: 18px;
+}
+
+/* Make strong tags stand out more */
+.step-detail strong {
+  color: #4a37ed;
+  font-weight: 600;
+}
+
+/* Add spacing after purpose and knowledge sections */
+.purpose-section + .knowledge-section {
+  margin-top: 22px;
+}
+
+.knowledge-section + h3 {
+  margin-top: 40px;
+}
+
+/* Step headings with improved styling */
+.step-heading, .step-detail h3 {
+  font-size: 19px;
+  font-weight: 600;
+  color: #4a37ed;
+  margin-top: 35px;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  border-left: 5px solid #4a37ed;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  line-height: 1.4;
+  clear: both;
+  display: block;
+}
+
+/* First step heading should not have a top margin */
+.step-detail h3:first-child, .step-heading:first-child {
+  margin-top: 0;
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .answer-content {
+    padding: 20px;
+  }
+  
+  .step-heading, .step-detail h3 {
+    font-size: 17px;
+    padding: 12px 15px;
+  }
+  
+  .purpose-section, .knowledge-section {
+    padding: 12px 15px;
+    font-size: 15px;
+  }
+  
+  .step-detail p {
+    font-size: 15px;
+  }
+}
+
+/* Add more spacing between steps */
+.step-detail > h3 {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(108, 99, 255, 0.1);
+}
+
+/* Ensure the first step doesn't have the top margin and border */
+.step-detail > h3:first-child {
+  margin-top: 0;
+  padding-top: 15px;
+  border-top: none;
+}
+
+/* Guidelines section with proper styling */
+.guidelines-section {
+  padding: 16px 20px;
+  border-left: 4px solid #f7dc6f;
+  margin: 22px 0;
+  border-radius: 0 10px 10px 0;
+  line-height: 1.7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  font-size: 16px;
+  display: block;
+  clear: both;
+}
+
+/* Add stronger separation between steps */
+.step-heading {
+  margin-top: 40px !important;
+  position: relative;
+  padding-top: 22px !important;
+}
+
+/* Add extra space after each step's knowledge section */
+.knowledge-section {
+  margin-bottom: 35px !important;
+}
+
+/* Ensure there's visible separation between sections even when rendered as a single block */
+.step-heading + .purpose-section,
+.purpose-section + .knowledge-section {
+  position: relative;
+  margin-top: 20px;
+}
+
+/* Code execution styles */
+.code-actions {
+  display: flex;
+  gap: 5px;
+  margin: 5px 0;
+  padding: 0 10px;
+}
+
+.code-output {
+  background-color: #f8f9fa;
+  border: 1px solid #eaeaea;
+  border-radius: 4px;
+  margin: 5px 0 15px 0;
+  overflow: hidden;
+}
+
+.output-header {
+  background-color: #e9ecef;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #495057;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.output-header.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.output-content {
+  padding: 10px;
+  margin: 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.output-content.error {
+  color: #c62828;
+}
+
+/* Purpose section styling */
+.step-detail strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* 新增：现代化聊天机器人回答样式设计 */
+
+/* ============ 全新回答容器设计 ============ */
+.enhanced-response-container {
+  font-family: var(--font-family);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+/* ============ 回答区域模块 ============ */
+.answer-section {
+  margin-bottom: 2em;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.answer-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-content {
+  padding: 1.5em;
+  background: white;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* ============ 区域标题样式 ============ */
+.section-header {
+  background: linear-gradient(135deg, var(--bg-accent) 0%, var(--bg-secondary) 100%);
+  padding: var(--space-xl) var(--space-2xl);
+  margin: 0;
+  position: relative;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.section-title {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  letter-spacing: -0.025em;
+}
+
+.section-title .emoji {
+  font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.section-line {
+  height: 2px;
+  background: var(--primary-gradient);
+  margin-top: var(--space-md);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ============ 子标题样式 ============ */
+.subsection-header {
+  margin: var(--space-sm) 0 var(--space-xs) 0;
+  position: relative;
+}
+
+.subsection-title {
+  color: var(--text-secondary);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+}
+
+.subsection-accent {
+  height: 2px;
+  width: 40px;
+  background: var(--primary-gradient);
+  border-radius: 1px;
+  margin-top: var(--space-xs);
+}
+
+/* ============ 步骤容器设计 ============ */
+.step-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1em;
+  margin: 1.5em 0;
+  padding: 1.2em;
+  background: #f8fafc;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+}
+
+.step-number {
+  background: var(--primary-color);
+  color: white;
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.step-heading {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* ============ 增强的列表样式 ============ */
+.enhanced-bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-sm) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.enhanced-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--space-xs) 0;
+  background: transparent;
+  border-radius: 0;
+  border-left: none;
+  transition: none;
+  position: relative;
+}
+
+.bullet-icon {
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-right: var(--space-sm);
+  margin-top: 2px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.bullet-text {
+  flex: 1;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* ============ 状态徽章系统 ============ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.7em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
+  margin: 0.2em;
+  white-space: nowrap;
+}
+
+.status-badge .badge-icon {
+  font-size: 1em;
+}
+
+.status-badge .badge-text {
+  font-size: inherit;
+}
+
+/* ============ 高亮框设计 ============ */
+.highlight-box {
+  margin: 1.2em 0;
+  padding: 1.2em;
+  border-radius: var(--radius-md);
+  border-left: 4px solid;
+  background: #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8em;
+}
+
+.highlight-box.tip {
+  border-left-color: var(--info-color);
+  background: #f0f9ff;
+}
+
+.highlight-box.warning {
+  border-left-color: var(--warning-color);
+  background: #fffbeb;
+}
+
+.highlight-box.success {
+  border-left-color: var(--success-color);
+  background: #f0fdf4;
+}
+
+.highlight-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  margin-top: 0.1em;
+}
+
+.highlight-text {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ============ 增强的代码块样式 ============ */
+.enhanced-code-snippet {
+  margin: 1.5em 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+}
+
+/* 代码块头部样式 */
+.enhanced-code-snippet .code-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: none;
+  margin: 0;
+}
+
+.enhanced-code-snippet .code-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enhanced-code-snippet .code-language {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.enhanced-code-snippet .code-lines {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.enhanced-code-snippet .code-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.enhanced-code-snippet .copy-code-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.enhanced-code-snippet .copy-code-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.enhanced-code-snippet .copy-code-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.enhanced-code-snippet .copy-code-btn i {
+  font-size: 14px;
+}
+
+/* 代码内容样式 */
+.enhanced-code-snippet .code-content {
+  background: #ffffff;
+  overflow-x: auto;
+  position: relative;
+  margin: 0;
+}
+
+.enhanced-code-snippet .code-content pre {
+  margin: 0;
+  padding: 20px 20px 20px 24px;
+  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  font-family: 'Consolas', 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d3748;
+  overflow-x: auto;
+  white-space: pre;
+  position: relative;
+}
+
+.enhanced-code-snippet .code-content::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+}
+
+.enhanced-code-snippet .code-content code {
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  display: block;
+}
+
+/* ============ 信息项样式 ============ */
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  padding: 0.8em 1.2em;
+  margin: 0.8em 0;
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.info-value {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+/* ============ 响应式设计 ============ */
+@media (max-width: 768px) {
+  .enhanced-response-container {
+    font-size: 14px;
+  }
+  
+  .step-container {
+    flex-direction: column;
+    gap: 0.8em;
+  }
+  
+  .step-number {
+    align-self: flex-start;
+  }
+  
+  .info-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4em;
+  }
+  
+  .enhanced-code-snippet .code-content pre {
+    font-size: 13px;
+    padding: 1em;
+  }
+}
+
+/* ============ 深色模式支持 ============ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #f7fafc;
+    --text-secondary: #e2e8f0;
+    --text-muted: #a0aec0;
+    --text-light: #718096;
+    
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --bg-accent: #2a4365;
+    
+    --border-color: #4a5568;
+    --border-light: #2d3748;
+  }
+}
+
+/* ============ 可访问性增强 ============ */
+.answer-section:focus-within {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.copy-code-btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* 减少动画对于偏好静态内容的用户 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============ 滚动条美化 ============ */
+.enhanced-response-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.enhanced-response-container::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.enhanced-response-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.enhanced-response-container::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+/* ============ Key Concepts 特殊样式 ============ */
+.key-concepts-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-xs) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.key-concepts-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 2px 0;
+  background: transparent;
+  border-radius: 0;
+  border-left: none;
+  transition: none;
+  position: relative;
+}
+
+.key-concepts-item .bullet-icon {
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-right: var(--space-sm);
+  margin-top: 1px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.key-concepts-item .bullet-text {
+  flex: 1;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  font-weight: 400;
+}
+
+/* 修复聊天机器人回答格式混乱的问题 */
+
+/* 修复段落间距 */
+.enhanced-response-container p {
+  margin-bottom: 0.8em;
+  line-height: 1.6;
+}
+
+/* 修复标题样式 */
+.enhanced-response-container h1,
+.enhanced-response-container h2,
+.enhanced-response-container h3,
+.enhanced-response-container h4,
+.enhanced-response-container h5,
+.enhanced-response-container h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.enhanced-response-container h1:first-child,
+.enhanced-response-container h2:first-child,
+.enhanced-response-container h3:first-child {
+  margin-top: 0;
+}
+
+/* 修复列表样式 */
+.enhanced-response-container ul,
+.enhanced-response-container ol {
+  margin: 1em 0;
+  padding-left: 0;
+}
+
+.enhanced-response-container li {
+  margin-bottom: 0.4em;
+  list-style: none;
+}
+
+/* 确保代码块不会溢出 */
+.enhanced-code-snippet {
+  margin: 1.5em 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+}
+
+.enhanced-code-snippet .code-content pre {
+  margin: 0;
+  padding: 1.2em;
+  background: #f8fafc;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.enhanced-code-snippet .code-content code {
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-family: var(--font-mono);
+}
+
+/* 修复内联代码样式 */
+.enhanced-inline-code {
+  background: #f1f5f9 !important;
+  color: #374151 !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 4px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.9em !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* 修复状态徽章样式 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.7em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
+  margin: 0.2em;
+  white-space: nowrap;
+}
+
+.status-badge .badge-icon {
+  font-size: 1em;
+}
+
+.status-badge .badge-text {
+  font-size: inherit;
+}
+
+/* 修复答案区域样式 */
+.answer-section {
+  margin-bottom: 2em;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.answer-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-content {
+  padding: 1.5em;
+  background: white;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* 修复高亮框样式 */
+.highlight-box {
+  margin: 1.2em 0;
+  padding: 1.2em;
+  border-radius: var(--radius-md);
+  border-left: 4px solid;
+  background: #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8em;
+}
+
+.highlight-box.tip {
+  border-left-color: var(--info-color);
+  background: #f0f9ff;
+}
+
+.highlight-box.warning {
+  border-left-color: var(--warning-color);
+  background: #fffbeb;
+}
+
+.highlight-box.success {
+  border-left-color: var(--success-color);
+  background: #f0fdf4;
+}
+
+.highlight-icon {
+  font-size: 1.2em;
+  line-height: 1;
+  margin-top: 0.1em;
+}
+
+.highlight-text {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* 修复信息卡片样式 */
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  padding: 0.8em 1.2em;
+  margin: 0.8em 0;
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.info-value {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+/* 修复步骤容器样式 */
+.step-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1em;
+  margin: 1.5em 0;
+  padding: 1.2em;
+  background: #f8fafc;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+}
+
+.step-number {
+  background: var(--primary-color);
+  color: white;
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.step-heading {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+/* 修复链接样式 */
+.enhanced-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.enhanced-link:hover {
+  color: var(--primary-dark);
+  border-bottom-color: currentColor;
+}
+
+.link-icon {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+/* 修复字体样式 */
+.enhanced-bold {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.enhanced-italic {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* 确保响应式设计 */
+@media (max-width: 768px) {
+  .enhanced-response-container {
+    font-size: 14px;
+  }
+  
+  .step-container {
+    flex-direction: column;
+    gap: 0.8em;
+  }
+  
+  .step-number {
+    align-self: flex-start;
+  }
+  
+  .info-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4em;
+  }
+  
+  .enhanced-code-snippet .code-content pre {
+    font-size: 13px;
+    padding: 1em;
+  }
+}
+
+/* 修复可能的样式冲突 */
+.enhanced-response-container * {
+  box-sizing: border-box;
+}
+
+.enhanced-response-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1em 0;
+}
+
+/* 清理多余的换行 */
+.enhanced-response-container br + br + br {
+  display: none;
+}
+
+.enhanced-response-container br:first-child {
+  display: none;
+}
+
+.enhanced-response-container br:last-child {
+  display: none;
+}
+
+/* ============ 强化代码块格式保护 ============ */
+/* 确保所有代码块在详细解释中保持正确格式 */
+.message.bot pre,
+.message.bot pre code {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+  font-family: 'Monaco', 'Consolas', 'SF Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 16px !important;
+  margin: 12px 0 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  box-shadow: none !important;
+  position: static !important;
+  z-index: auto !important;
+  display: block !important;
+}
+
+/* 内联代码样式强化 */
+.message.bot code:not(pre code) {
+  background: #4a5568 !important;
+  color: #e2e8f0 !important;
+  font-family: 'Monaco', 'Consolas', 'SF Mono', monospace !important;
+  font-size: 13px !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  border: none !important;
+  font-weight: normal !important;
+  white-space: nowrap !important;
+  display: inline !important;
+}
+
+/* 确保增强代码片段的优先级 */
+.enhanced-code-snippet .code-content pre,
+.enhanced-code-snippet .code-content code {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+  font-family: 'Monaco', 'Consolas', 'SF Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  position: static !important;
+  display: block !important;
+  box-shadow: none !important;
+} 

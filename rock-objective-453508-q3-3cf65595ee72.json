@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rock-objective-453508-q3",
+  "private_key_id": "3cf65595ee7251f283cb3778a67a3524626abee0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC2+FU0aRhR+SN5\nLpdpryfYdU57t81O3pff3p9uK+MZZRwHoYqne6ZpcU5PQxtxDifXC2EVmXSQd6Dh\nkMnS7qUF7NoM1dRSdgROgu+WcYBxA6nyj5MDK9JFRmUhXuzZLhUbmWwT4NZt1EoK\nqvMPrIkQJbJm8ycv0rbMcYU6+xUwLBNX/sZhemdtRWPJIjPRR6UgBkxRgmm81d/4\nWzbPGqVkGSCbpluKbjCHrZQVZpPB6Jh12aLksA0XGV1TH7E3iJV8KkpbiHvOSTsH\n5dt1WKXhaeJcbFHpdzJ5yHzqYMaFdp3pJvs9TQUjlKDTzolJ5jUdPUOWbjaFgqNi\nxMzfBdKlAgMBAAECggEAAiJmeAyLzJT/7W92M7Tn3ZYMutO7kOJ22hUyPepEJW0x\nBQPE5sxB9jPsqm8JeGmmXFNVKBfYrMDAfzEdsZi4ExgeuQybg/S9ex765YHgcjEN\nP/edyuktdEJsdpWxZJ0tgNtqz9aNGc3iqToySKoGFUqjSKEogV3PZRYj7Dq2lg/A\ng17QY5++uJcB1Rqw0Sega4J5Joi4ujx73Q0I94TGXxJSiq918Jm+zLQ7PdJW9U5x\nggo+yc7WBFe7aqHjqI4mi6vPOT855Yv6MRAJDL4giYo+voIaqXlKHMMEG1Qj8GIx\nVEbNiLtVSWxaV7u81/mhv/XrhpYWpElKF/doyI5RRwKBgQDZAUWqk8veWlp9dWrG\nZVVN0ElSI5rK77FmLrz0BmeDejUQLcrVf8mPgMXrxdK7/sfErtmZxkbCXs4VxOSv\nWHU21dbOEOWrGXyVif7tkIvU41ycINUb7VwGMEVKheAVWiucTrGOxq7Lg2lVKCG3\n9jNM9EnD/IGqbcnOETDwLQupFwKBgQDX2WBIsgLN8Vrvqm/2GJXlFCtCgamVcHus\nVvZ9iKkfnvwi2AHStC/2xJek8cop69i6Kok30FjxQKp1z8KyBqctJnVXcCg1aFOD\n0zcXJ+FRBSgipyGeRHO25tp4w9rY14i3cToMrpWDNXg5ZFK2+B9+UD2BxpbqEAsU\n2zQtEre/owKBgQCJMg6zi4GG8KTpUMTS7doCuj7A2ZXR27zSl5YKycnEDA1kTy8/\nz+zE92sqZwWWqbvvE4SrffnahUnR5YuXeFuS8Zs+6NvrUs+7U2WDGLHvRFeWtgNG\nBsj5eKc2OHG1zi5oQjBrzh1QuaJsnlTDE7rXWlMQv6HS+FpwF9pS3ofSvQKBgH5N\nB/YBk3qGG7vZcyIBSNR+dMG5tU1oQDWbvSe/a5bBJLAOzSJJpTcz2bf+c1kMVAi7\nEwfBtgmU2SmOpFIfansU4dyEGEMIBLZCRR4bi9AowE9mlFlTnJINixDXKZtwouMU\nMe9xyLK5+ts6RNwjW+pBcXwag/v530IY8fLd3P8ZAoGAPI1yHXTc5Suv3zJbO5Y6\nHYitIwarGmv0tCuWFWrul5skbeEv0RKxvDiaJYDW0pVggC7gWeYbhSGWpCARnYrl\nqFpS+LJ7eSaGXvfwp8dhWHQXjdU1wTvG8XpTcwvt84fDC2gVoGKAmF9PZspulB9u\nnJtVNNKPT81AuExmHOB5UU8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "python-knowledge-graph-service@rock-objective-453508-q3.iam.gserviceaccount.com",
+  "client_id": "110339616820280453638",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/python-knowledge-graph-service%40rock-objective-453508-q3.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

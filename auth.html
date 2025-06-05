@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录 - Python 学习平台</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #4b6cb7, #182848);
+            color: white;
+            padding: 40px 30px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .auth-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="none" width="100" height="100"/><rect fill="rgba(255,255,255,0.05)" width="50" height="50"/><rect fill="rgba(255,255,255,0.05)" x="50" y="50" width="50" height="50"/></svg>');
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .auth-header * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .auth-body {
+            padding: 40px 30px;
+        }
+
+        .form-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #4b6cb7;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            position: relative;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4b6cb7;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #e74c3c;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-checkbox input {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+
+        .form-checkbox label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4b6cb7, #182848);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(75, 108, 183, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #27ae60;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+            z-index: 0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .guest-link {
+            display: block;
+            text-align: center;
+            color: #4b6cb7;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 12px;
+            border: 2px solid #4b6cb7;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .guest-link:hover {
+            background: #4b6cb7;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .strength-indicator {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-bar.weak { background: #e74c3c; width: 25%; }
+        .strength-bar.fair { background: #f39c12; width: 50%; }
+        .strength-bar.good { background: #f1c40f; width: 75%; }
+        .strength-bar.strong { background: #27ae60; width: 100%; }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 10px;
+                max-width: none;
+            }
+            
+            .auth-header {
+                padding: 30px 20px 20px;
+            }
+            
+            .auth-body {
+                padding: 30px 20px;
+            }
+            
+            .auth-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1 class="auth-title">
+                <i class="fas fa-graduation-cap"></i>
+                Python Learning Platform
+            </h1>
+            <p class="auth-subtitle">Start Your Programming Journey</p>
+        </div>
+        
+        <div class="auth-body">
+            <div class="form-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="register">Register</button>
+            </div>
+
+            <div id="message-container"></div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label class="form-label" for="login-username">Username or Email</label>
+                    <input type="text" id="login-username" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-input" required>
+                </div>
+                
+                <div class="form-checkbox">
+                    <input type="checkbox" id="remember-me">
+                    <label for="remember-me">Remember me</label>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <div class="loading-spinner"></div>
+                    <span class="btn-text">Login</span>
+                </button>
+            </form>
+
+            <!-- Registration Form -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label" for="register-username">Username</label>
+                    <input type="text" id="register-username" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="register-email">Email</label>
+                    <input type="email" id="register-email" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="register-password">Password</label>
+                    <input type="password" id="register-password" class="form-input" required>
+                    <div class="password-strength">
+                        <div class="strength-indicator">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                        <div id="strength-text">Please enter a password</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" class="form-input" required>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <div class="loading-spinner"></div>
+                    <span class="btn-text">Register</span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <a href="/" class="guest-link">
+                <i class="fas fa-eye"></i>
+                Browse as Guest
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Add this function at the beginning of the script
+        async function clearExistingSession() {
+            try {
+                const response = await fetch('/api/auth/logout-all', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    console.warn('Failed to clear existing session');
+                }
+            } catch (error) {
+                console.warn('Error clearing session:', error);
+            }
+        }
+
+        // Call clearExistingSession when the page loads
+        window.addEventListener('load', clearExistingSession);
+
+        // Modify the checkAuthStatus function
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    // Get the current URL parameters
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const action = urlParams.get('action');
+                    
+                    // If user specifically clicked login/register, log them out first
+                    if (action === 'login' || action === 'register') {
+                        await clearExistingSession();
+                        return;
+                    }
+                    
+                    // Otherwise show logged in options
+                    showLoggedInOptions(data.user);
+                }
+            } catch (error) {
+                // Ignore error, continue showing login page
+                console.warn('Auth check failed:', error);
+            }
+        }
+
+        // Modify the tab buttons to add URL parameter
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                
+                // Update URL with the current action
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('action', tab);
+                window.history.pushState({}, '', newUrl);
+                
+                // Update tab display
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                document.getElementById(`${tab}-form`).classList.add('active');
+                
+                clearMessage();
+            });
+        });
+
+        // Set initial tab based on URL parameter
+        function setInitialTab() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            
+            if (action === 'register') {
+                document.querySelector('[data-tab="register"]').click();
+            } else {
+                document.querySelector('[data-tab="login"]').click();
+            }
+        }
+
+        // Call setInitialTab after DOM is loaded
+        document.addEventListener('DOMContentLoaded', setInitialTab);
+
+        // 密码强度检测
+        document.getElementById('register-password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strength-bar');
+            const strengthText = document.getElementById('strength-text');
+            
+            let strength = 0;
+            let strengthClass = '';
+            let strengthMessage = '';
+            
+            if (password.length >= 6) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    strengthClass = 'weak';
+                    strengthMessage = 'Password Strength: Weak';
+                    break;
+                case 2:
+                    strengthClass = 'fair';
+                    strengthMessage = 'Password Strength: Fair';
+                    break;
+                case 3:
+                    strengthClass = 'good';
+                    strengthMessage = 'Password Strength: Good';
+                    break;
+                case 4:
+                    strengthClass = 'strong';
+                    strengthMessage = 'Password Strength: Strong';
+                    break;
+            }
+            
+            strengthBar.className = `strength-bar ${strengthClass}`;
+            strengthText.textContent = strengthMessage;
+        });
+
+        // 登录表单提交
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('.submit-btn');
+            const spinner = btn.querySelector('.loading-spinner');
+            const btnText = btn.querySelector('.btn-text');
+            
+            // 显示加载状态
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Logging in...';
+            
+            const formData = {
+                username_or_email: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value,
+                remember_me: document.getElementById('remember-me').checked
+            };
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Login successful! Redirecting...', 'success');
+                    
+                    // 在localStorage中也保存用户信息作为备用
+                    if (data.user) {
+                        localStorage.setItem('userData', JSON.stringify(data.user));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userToken', data.session_token || 'session_from_cookie');
+                    }
+                    
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error, please try again later', 'error');
+            } finally {
+                // 恢复按钮状态
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Login';
+            }
+        });
+
+        // 注册表单提交
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = this.querySelector('.submit-btn');
+            const spinner = btn.querySelector('.loading-spinner');
+            const btnText = btn.querySelector('.btn-text');
+            
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            // 显示加载状态
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Registering...';
+            
+            const formData = {
+                username: document.getElementById('register-username').value,
+                email: document.getElementById('register-email').value,
+                password: password,
+                confirm_password: confirmPassword
+            };
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Registration successful! Please login', 'success');
+                    // 切换到登录表单
+                    document.querySelector('[data-tab="login"]').click();
+                    // 清空注册表单
+                    this.reset();
+                } else {
+                    showMessage(data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error, please try again later', 'error');
+            } finally {
+                // 恢复按钮状态
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Register';
+            }
+        });
+
+        function showMessage(message, type) {
+            const container = document.getElementById('message-container');
+            const messageClass = type === 'error' ? 'error-message' : 'success-message';
+            
+            container.innerHTML = `<div class="${messageClass}">${message}</div>`;
+            
+            // 自动清除消息
+            setTimeout(() => {
+                if (container.innerHTML.includes(message)) {
+                    container.innerHTML = '';
+                }
+            }, 5000);
+        }
+
+        function clearMessage() {
+            document.getElementById('message-container').innerHTML = '';
+        }
+
+        // 显示已登录用户的选项
+        function showLoggedInOptions(user) {
+            const authContainer = document.querySelector('.auth-container');
+            const loggedInHtml = `
+                <div class="logged-in-notice">
+                    <div class="auth-header">
+                        <h2 class="auth-title">You are logged in</h2>
+                        <p class="auth-subtitle">Current user: ${user.username}</p>
+                    </div>
+                    <div class="auth-body">
+                        <div class="logged-in-options">
+                            <button class="submit-btn" onclick="continueToApp()">
+                                <i class="fas fa-arrow-right"></i>
+                                Continue
+                            </button>
+                            <button class="submit-btn logout-btn" onclick="switchAccount()">
+                                <i class="fas fa-user-plus"></i>
+                                Switch Account
+                            </button>
+                            <div class="divider">
+                                <span>or</span>
+                            </div>
+                            <a href="/" class="guest-link">
+                                <i class="fas fa-home"></i>
+                                Return to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    .logged-in-notice .submit-btn {
+                        margin-bottom: 15px;
+                    }
+                    .logout-btn {
+                        background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+                    }
+                    .logout-btn:hover {
+                        background: linear-gradient(135deg, #c0392b, #a93226) !important;
+                    }
+                    .logged-in-options {
+                        text-align: center;
+                    }
+                </style>
+            `;
+            authContainer.innerHTML = loggedInHtml;
+        }
+
+        // 继续使用当前账号
+        function continueToApp() {
+            window.location.href = '/';
+        }
+
+        // 切换账号（退出当前账号）
+        async function switchAccount() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    // 清除可能的本地存储
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // 重新加载页面显示登录表单
+                    window.location.reload();
+                } else {
+                    // 强制清除Cookie并重新加载
+                    document.cookie = 'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    window.location.reload();
+                }
+            } catch (error) {
+                // 强制清除Cookie并重新加载
+                document.cookie = 'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.reload();
+            }
+        }
+
+        // 添加调试功能到auth.html
+        window.debugAuthStatus = async function() {
+            console.log('🔍 Debug: Checking authentication status...');
+            
+            // 1. 检查localStorage
+            console.log('📦 LocalStorage data:');
+            const localKeys = ['userData', 'isLoggedIn', 'userToken', 'authToken', 'sessionToken'];
+            localKeys.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    console.log(`  ${key}: ${value}`);
+                } else {
+                    console.log(`  ${key}: (not set)`);
+                }
+            });
+            
+            // 2. 检查sessionStorage
+            console.log('📦 SessionStorage data:');
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                console.log(`  ${key}: ${sessionStorage.getItem(key)}`);
+            }
+            
+            // 3. 检查cookies
+            console.log('🍪 Cookies:');
+            if (document.cookie) {
+                document.cookie.split(';').forEach(cookie => {
+                    console.log(`  ${cookie.trim()}`);
+                });
+            } else {
+                console.log('  (no cookies)');
+            }
+            
+            // 4. 检查服务器认证状态
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                console.log('🖥️ Server auth status:', data);
+            } catch (e) {
+                console.log('❌ Server auth check failed:', e);
+            }
+            
+            // 5. 测试session token
+            const sessionToken = document.cookie
+                .split(';')
+                .find(c => c.trim().startsWith('session_token='));
+            if (sessionToken) {
+                console.log('🔑 Found session token:', sessionToken.split('=')[1]);
+            } else {
+                console.log('🔑 No session token found');
+            }
+        };
+        
+        // 完全清除认证状态的调试功能
+        window.debugForceLogout = async function() {
+            console.log('🧹 Debug: Force logout - clearing all auth data...');
+            
+            // 1. 调用logout-all
+            try {
+                await fetch('/api/auth/logout-all', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                console.log('✅ Server logout-all completed');
+            } catch (e) {
+                console.log('❌ Server logout-all failed:', e);
+            }
+            
+            // 2. 清除所有localStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // 3. 清除所有cookies
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                const eqPos = cookie.indexOf("=");
+                const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                
+                // 尝试多种domain和path组合
+                const combinations = [
+                    { domain: '', path: '/' },
+                    { domain: 'localhost', path: '/' },
+                    { domain: '127.0.0.1', path: '/' },
+                    { domain: '.localhost', path: '/' },
+                    { domain: '.127.0.0.1', path: '/' },
+                ];
+                
+                combinations.forEach(({ domain, path }) => {
+                    let cookieStr = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path};`;
+                    if (domain) {
+                        cookieStr += ` domain=${domain};`;
+                    }
+                    document.cookie = cookieStr;
+                });
+            }
+            
+            console.log('🧹 Force logout completed');
+            
+            // 重新检查状态
+            setTimeout(() => {
+                debugAuthStatus();
+            }, 1000);
+        };
+        
+        console.log('🔧 认证调试功能已加载:');
+        console.log('  - debugAuthStatus(): 检查当前认证状态');
+        console.log('  - debugForceLogout(): 强制清除所有认证数据');
+    </script>
+</body>
+</html> 
