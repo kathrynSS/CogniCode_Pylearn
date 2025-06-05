@@ -1,21 +1,17 @@
 import os
-from flask import Flask, request, jsonify, send_file, send_from_directory, make_response
+from flask import Flask, request, jsonify, send_file, make_response
 from openai import OpenAI
 from flask_cors import CORS
-import requests
 import json
 import re
 import ast
 import traceback
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
-from prompt import PROMPTS, PROJECT_TEMPLATES, get_learning_chatbot_prompt, get_step_explanation_prompt, get_code_review_prompt_enhanced, get_adaptive_hint_prompt, get_concept_explanation_prompt, get_reflection_prompt_enhanced, get_resource_recommendation_prompt
-import multiprocessing
-import signal
-import time
+from prompt import PROMPTS, PROJECT_TEMPLATES,  get_step_explanation_prompt, get_adaptive_hint_prompt,  get_reflection_prompt_enhanced
 from werkzeug.utils import secure_filename
 import datetime
-import threading
+
 
 # 导入Google Drive服务
 from google_drive_service import GoogleDriveService
