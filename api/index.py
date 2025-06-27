@@ -1,5 +1,6 @@
 import os
 import sys
+import mimetypes
 from flask import Flask, request, jsonify, send_file, make_response
 from openai import OpenAI
 from flask_cors import CORS
@@ -1334,14 +1335,12 @@ def upload_file():
             # 如果secure_filename返回空字符串或者只是扩展名，使用默认名称
             if not secure_original_filename or secure_original_filename.startswith('.') or '.' not in secure_original_filename:
                 # 从原始文件名提取扩展名
-                import os
                 _, ext = os.path.splitext(original_filename)
                 if not ext:
                     ext = '.file'
                 secure_original_filename = f'uploaded_file{ext}'
             
             # 获取MIME类型
-            import mimetypes
             mime_type, _ = mimetypes.guess_type(original_filename)
             
             # 生成标签
