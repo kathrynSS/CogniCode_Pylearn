@@ -82,13 +82,6 @@ https://github.com/user-attachments/assets/0eb4c110-4a3b-4f22-a506-85a0b8233afc
     ```
     http://localhost:5000
     ```
-    
----
-
-## 🙌 Join the Community
-
-- Open to issues, discussions, and pull requests — your feedback and contributions are highly appreciated!
-- **If you find this project helpful, please give us a ⭐ Star — it motivates us to keep improving!**
 
 <div align="center">
 
