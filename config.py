@@ -6,7 +6,7 @@ load_dotenv()
 
 class Config:
     # Google Drive API配置
-    GOOGLE_DRIVE_API_KEY = os.getenv('GOOGLE_DRIVE_API_KEY', '')
+    GOOGLE_DRIVE_API_KEY = os.getenv('GOOGLE_DRIVE_API_KEY', 'd9c4291725fb8dd81de139b2d6d2b3883babfb8c')
     GOOGLE_DRIVE_CREDENTIALS_PATH = os.getenv('GOOGLE_DRIVE_CREDENTIALS_PATH', 'google_drive_credentials.json')
     
     # 文件上传配置
