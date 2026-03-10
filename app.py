@@ -123,7 +123,7 @@ try:
     
     # HARDCODED API KEY for DeepSeek - WARNING: NOT RECOMMENDED FOR PRODUCTION!
     # Remove this and use environment variables for security
-    HARDCODED_API_KEY = "sk-0e2c23a0864043f7bbfcb36546818447"  # DeepSeek API key
+    HARDCODED_API_KEY = ""  # DeepSeek API key
     
     # Try to get API key from environment variable first, then fallback to hardcoded
     api_key = os.getenv('DEEPSEEK_API_KEY') or HARDCODED_API_KEY
